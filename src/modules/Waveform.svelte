@@ -1,6 +1,7 @@
 <script>
     import * as Pizzicato from 'pizzicato';
-    import {getWaveData} from "../utils/wave-utils";
+    import WaveformCanvas from './WaveformCanvas.svelte';
+
 
     let isSoundPlaying = false;
     let doDrawing = false;
@@ -12,10 +13,6 @@
             frequency: 180,
         }
     });
-
-    const onePeriodMs = 1000 / soundWave.frequency;
-    const drawInterval = 5 * onePeriodMs;
-    console.log({drawInterval});
 
     soundWave.on('play', () => {
         isSoundPlaying = true;
@@ -33,59 +30,11 @@
 
     function startSound() {
         soundWave.play();
-        connectAnalyser();
     }
 
     function stopSound() {
         soundWave.stop();
     }
-
-    function connectAnalyser() {
-        const analyser = Pizzicato.context.createAnalyser();
-        analyser.fftSize = 4096;
-
-        soundWave.connect(analyser);
-
-        const waveform = new Float32Array(analyser.frequencyBinCount);
-        const scopeCanvas = document.getElementById('canvas');
-        scopeCanvas.width = waveform.length;
-        scopeCanvas.height = scopeCanvas.width * 0.33;
-
-        const scopeContext = scopeCanvas.getContext('2d');
-        scopeContext.strokeStyle = "red";
-
-        function draw() {
-            analyser.getFloatTimeDomainData(waveform);
-            console.log({waveform});
-            const waveData = getWaveData(waveform);
-            console.log({waveData});
-
-            scopeContext.clearRect(0, 0, scopeCanvas.width, scopeCanvas.height);
-            scopeContext.beginPath();
-            for (let i = 0; i < waveData.length; i++) {
-                const x = i;
-                const y = (0.5 + waveData[i] / 2) * scopeCanvas.height;
-                if (i === 0) {
-                    scopeContext.moveTo(x, y);
-                } else {
-                    scopeContext.lineTo(x, y);
-                }
-            }
-            scopeContext.stroke();
-
-            //console.log(waveform);
-
-            //requestAnimationFrame(draw);
-
-            if (doDrawing) {
-                //setTimeout(draw, drawInterval);
-                requestAnimationFrame(draw);
-            }
-        }
-
-        requestAnimationFrame(draw);
-    }
-
 
 </script>
 
@@ -93,6 +42,4 @@
     make a sound
 </button>
 
-<div id="canvas-container">
-    <canvas id="canvas" width="500" height="375"></canvas>
-</div>
+<WaveformCanvas {soundWave} {doDrawing}></WaveformCanvas>

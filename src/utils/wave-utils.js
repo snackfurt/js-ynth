@@ -1,3 +1,5 @@
+import * as Pizzicato from "pizzicato";
+
 function getWaveData(waveform) {
     // start at first zero crossing to enable drawing the wave "statically", always beginning at the same starting point
     const zeroIndex1 = getZeroCrossingIndex(waveform);
@@ -14,6 +16,27 @@ function getZeroCrossingIndex(waveformData) {
     });
 }
 
+function createAnalyser(soundWave) {
+    const analyser = Pizzicato.context.createAnalyser();
+    analyser.fftSize = 4096;
+
+    const waveform = new Float32Array(analyser.frequencyBinCount);
+
+    soundWave.connect(analyser);
+
+    return {
+        waveformLength: waveform.length,
+        getWaveData: () => {
+            analyser.getFloatTimeDomainData(waveform);
+            console.log({waveform});
+            const waveData = getWaveData(waveform);
+            console.log({waveData});
+
+            return waveData;
+        }
+    }
+}
+
 export {
-    getWaveData,
+    createAnalyser,
 }
