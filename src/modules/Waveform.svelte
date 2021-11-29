@@ -1,12 +1,21 @@
 <script>
     import * as Pizzicato from 'pizzicato';
 
+    let isSoundPlaying = false;
+
     const sawtoothWave = new Pizzicato.Sound({
         source: 'wave',
         options: {
             type: 'sine',
             frequency: 90,
         }
+    });
+
+    sawtoothWave.on('play', () => {
+        isSoundPlaying = true;
+    });
+    sawtoothWave.on('stop', () => {
+        setTimeout(() => isSoundPlaying = false, 1000);
     });
 
     function startSound() {
@@ -20,7 +29,7 @@
 
     function connectAnalyser() {
         const analyser = Pizzicato.context.createAnalyser();
-        analyser.fftSize = 2048;
+        analyser.fftSize = 4096;
 
         sawtoothWave.connect(analyser);
 
@@ -33,15 +42,22 @@
         scopeContext.strokeStyle = "red";
 
         const onePeriodMs = 1000 / sawtoothWave.frequency;
-        const starttime = Date.now();
+        const timeout = 10 * onePeriodMs;
+        //console.log({timeout});
 
         function draw() {
+            if (!isSoundPlaying) return;
+
             analyser.getFloatTimeDomainData(waveform);
+            console.log({waveform});
+            const waveData = getWaveData(waveform);
+            console.log({waveData});
+
             scopeContext.clearRect(0, 0, scopeCanvas.width, scopeCanvas.height);
             scopeContext.beginPath();
-            for (var i = 0; i < waveform.length; i++) {
-                var x = i;
-                var y = (0.5 + waveform[i] / 2) * scopeCanvas.height;
+            for (let i = 0; i < waveData.length; i++) {
+                const x = i;
+                const y = (0.5 + waveData[i] / 2) * scopeCanvas.height;
                 if (i === 0) {
                     scopeContext.moveTo(x, y);
                 } else {
@@ -54,20 +70,29 @@
 
             //requestAnimationFrame(draw);
 
-            const timeElapsed = Date.now() - starttime;
-            const periodsElapsed = timeElapsed / onePeriodMs;
-            const timeUntilNextPeriod = timeElapsed % onePeriodMs;
-            const timeout = timeUntilNextPeriod + 10 * onePeriodMs;
-
-            console.log({timeElapsed, periodsElapsed, timeUntilNextPeriod, timeout});
-
             setTimeout(draw, timeout);
         }
 
-        const timeout = 10 * onePeriodMs;
-        console.log({timeout});
         setTimeout(draw, timeout);
         //draw();
+    }
+
+    function getWaveData(waveform) {
+        const zeroIndex1 = getZeroCrossingIndex(waveform);
+        if (zeroIndex1 === -1) {
+            return waveform;
+        }
+
+        const zeroIndex2 = zeroIndex1 + getZeroCrossingIndex(waveform.slice(zeroIndex1));
+        const zeroIndex3 = zeroIndex2 + getZeroCrossingIndex(waveform.slice(zeroIndex2));
+
+        return waveform.slice(zeroIndex1, zeroIndex3);
+    }
+
+    function getZeroCrossingIndex(waveformData) {
+        return waveformData.findIndex((wavePoint, index, data) => {
+            return (index > 0) && data[index-1] < 0 && wavePoint >= 0;
+        });
     }
 </script>
 
