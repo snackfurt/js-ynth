@@ -1,37 +1,50 @@
 <script>
     import * as Pizzicato from 'pizzicato';
+    import {getWaveData} from "../utils/wave-utils";
 
     let isSoundPlaying = false;
+    let doDrawing = false;
 
-    const sawtoothWave = new Pizzicato.Sound({
+    const soundWave = new Pizzicato.Sound({
         source: 'wave',
         options: {
             type: 'sine',
-            frequency: 90,
+            frequency: 180,
         }
     });
 
-    sawtoothWave.on('play', () => {
+    const onePeriodMs = 1000 / soundWave.frequency;
+    const drawInterval = 5 * onePeriodMs;
+    console.log({drawInterval});
+
+    soundWave.on('play', () => {
         isSoundPlaying = true;
+        doDrawing = true;
     });
-    sawtoothWave.on('stop', () => {
-        setTimeout(() => isSoundPlaying = false, 1000);
+    soundWave.on('stop', () => {
+        isSoundPlaying = false;
+        //TODO: find a timeout without magic number - it seems to be not the sound's release
+        //const timeout = Math.max(soundWave.release * 1000, drawInterval);
+        const timeout = 150;
+        setTimeout(() => {
+            doDrawing = false;
+        }, timeout);
     });
 
     function startSound() {
-        sawtoothWave.play();
+        soundWave.play();
         connectAnalyser();
     }
 
     function stopSound() {
-        sawtoothWave.stop();
+        soundWave.stop();
     }
 
     function connectAnalyser() {
         const analyser = Pizzicato.context.createAnalyser();
         analyser.fftSize = 4096;
 
-        sawtoothWave.connect(analyser);
+        soundWave.connect(analyser);
 
         const waveform = new Float32Array(analyser.frequencyBinCount);
         const scopeCanvas = document.getElementById('canvas');
@@ -41,13 +54,7 @@
         const scopeContext = scopeCanvas.getContext('2d');
         scopeContext.strokeStyle = "red";
 
-        const onePeriodMs = 1000 / sawtoothWave.frequency;
-        const timeout = 10 * onePeriodMs;
-        //console.log({timeout});
-
         function draw() {
-            if (!isSoundPlaying) return;
-
             analyser.getFloatTimeDomainData(waveform);
             console.log({waveform});
             const waveData = getWaveData(waveform);
@@ -70,30 +77,16 @@
 
             //requestAnimationFrame(draw);
 
-            setTimeout(draw, timeout);
+            if (doDrawing) {
+                //setTimeout(draw, drawInterval);
+                requestAnimationFrame(draw);
+            }
         }
 
-        setTimeout(draw, timeout);
-        //draw();
+        requestAnimationFrame(draw);
     }
 
-    function getWaveData(waveform) {
-        const zeroIndex1 = getZeroCrossingIndex(waveform);
-        if (zeroIndex1 === -1) {
-            return waveform;
-        }
 
-        const zeroIndex2 = zeroIndex1 + getZeroCrossingIndex(waveform.slice(zeroIndex1));
-        const zeroIndex3 = zeroIndex2 + getZeroCrossingIndex(waveform.slice(zeroIndex2));
-
-        return waveform.slice(zeroIndex1, zeroIndex3);
-    }
-
-    function getZeroCrossingIndex(waveformData) {
-        return waveformData.findIndex((wavePoint, index, data) => {
-            return (index > 0) && data[index-1] < 0 && wavePoint >= 0;
-        });
-    }
 </script>
 
 <button on:mousedown={startSound} on:mouseup={stopSound}>
