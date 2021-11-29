@@ -23,7 +23,7 @@
         canvas.height = canvas.width * 0.33;
 
         drawingContext = canvas.getContext('2d');
-        drawingContext.strokeStyle = "red";
+        drawingContext.strokeStyle = "#ff3e00";
 
         getSoundWaveData = getWaveData;
     }
@@ -51,7 +51,7 @@
     }
 
     function getWavePointCoordsAtIndex(waveData, index) {
-        const padding = 4;   // avoid clipping of top points
+        const padding = 100;   // avoid clipping of top points
         const yOffset = padding / 2;
         const height = canvas.height - padding;
         return {
@@ -63,4 +63,13 @@
 </script>
 
 
-<canvas bind:this={canvas} width={32} height={32}></canvas>
+<div class="canvasContainer">
+    <canvas bind:this={canvas} width={32} height={32}></canvas>
+</div>
+
+
+<style>
+    .canvasContainer {
+        max-width: 200px;
+    }
+</style>

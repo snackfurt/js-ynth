@@ -28,9 +28,9 @@ function createAnalyser(soundWave) {
         waveformLength: waveform.length,
         getWaveData: () => {
             analyser.getFloatTimeDomainData(waveform);
-            console.log({waveform});
+            //console.log({waveform});
             const waveData = getWaveData(waveform);
-            console.log({waveData});
+            //console.log({waveData});
 
             return waveData;
         }

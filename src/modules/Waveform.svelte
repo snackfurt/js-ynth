@@ -1,16 +1,27 @@
+<Knob bind:value={frequency} max={5000} min={60} pixelRange={200}/>
+
+<button class="unselectable" on:mousedown={startSound} on:mouseup={stopSound}>
+    make a sound
+</button>
+
+<WaveformCanvas {soundWave} {doDrawing}></WaveformCanvas>
+
+
 <script>
     import * as Pizzicato from 'pizzicato';
     import WaveformCanvas from './WaveformCanvas.svelte';
+    import Knob from "../components/Knob.svelte";
 
 
     let isSoundPlaying = false;
     let doDrawing = false;
+    let frequency = 80;
 
     const soundWave = new Pizzicato.Sound({
         source: 'wave',
         options: {
             type: 'sine',
-            frequency: 180,
+            frequency: frequency,
         }
     });
 
@@ -36,10 +47,6 @@
         soundWave.stop();
     }
 
+    $: soundWave.frequency = frequency;
+
 </script>
-
-<button on:mousedown={startSound} on:mouseup={stopSound}>
-    make a sound
-</button>
-
-<WaveformCanvas {soundWave} {doDrawing}></WaveformCanvas>

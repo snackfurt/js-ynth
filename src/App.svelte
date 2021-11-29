@@ -1,14 +1,22 @@
 <script>
 
-import Waveform from "./modules/Waveform.svelte";
+import Waveform from './modules/Waveform.svelte';
 </script>
 
 <main>
-	<h1>Hello</h1>
+	<h1 class="unselectable">Hello</h1>
 	<Waveform />
 </main>
 
 <style>
+	:global(.unselectable) {
+		user-select: none;
+	}
+
+	:global(.center) {
+		margin: 0 auto;
+	}
+
 	main {
 		text-align: center;
 		padding: 1em;
