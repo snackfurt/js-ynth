@@ -4,7 +4,8 @@
     const sawtoothWave = new Pizzicato.Sound({
         source: 'wave',
         options: {
-            type: 'sawtooth'
+            type: 'sine',
+            frequency: 90,
         }
     });
 
@@ -29,7 +30,10 @@
         scopeCanvas.height = scopeCanvas.width * 0.33;
 
         const scopeContext = scopeCanvas.getContext('2d');
-        scopeContext.strokeStyle = "black"; // Green path
+        scopeContext.strokeStyle = "red";
+
+        const onePeriodMs = 1000 / sawtoothWave.frequency;
+        const starttime = Date.now();
 
         function draw() {
             analyser.getFloatTimeDomainData(waveform);
@@ -46,10 +50,24 @@
             }
             scopeContext.stroke();
 
-            requestAnimationFrame(draw);
+            //console.log(waveform);
+
+            //requestAnimationFrame(draw);
+
+            const timeElapsed = Date.now() - starttime;
+            const periodsElapsed = timeElapsed / onePeriodMs;
+            const timeUntilNextPeriod = timeElapsed % onePeriodMs;
+            const timeout = timeUntilNextPeriod + 10 * onePeriodMs;
+
+            console.log({timeElapsed, periodsElapsed, timeUntilNextPeriod, timeout});
+
+            setTimeout(draw, timeout);
         }
 
-        draw();
+        const timeout = 10 * onePeriodMs;
+        console.log({timeout});
+        setTimeout(draw, timeout);
+        //draw();
     }
 </script>
 
