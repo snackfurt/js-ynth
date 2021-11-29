@@ -1,5 +1,5 @@
 <div class="canvasContainer">
-    <canvas bind:this={onscreenCanvas} width={600} height={200}></canvas>
+    <canvas class="canvas" bind:this={onscreenCanvas}></canvas>
 </div>
 
 
@@ -35,6 +35,7 @@
 
         offscreenDrawingContext = offscreenCanvas.getContext('2d');
         offscreenDrawingContext.strokeStyle = "#ff3e00";
+        offscreenDrawingContext.lineWidth = 3;
 
         getSoundWaveData = getWaveData;
 
@@ -42,6 +43,8 @@
         canvasImageSource = offscreenCanvas.toDataURL();
 
         onscreenDrawingContext = onscreenCanvas.getContext('2d');
+
+        setCanvasSize();
     }
 
     function drawWaveform() {
@@ -78,17 +81,24 @@
         }
     }
 
+    function setCanvasSize() {
+        const { width, height } = onscreenCanvas.parentNode.getBoundingClientRect();
+        onscreenCanvas.width = width;
+        onscreenCanvas.height = width * 0.33;
+    }
+
     function renderImage() {
         canvasImage.onload = () => {
             //if the image is being drawn due to resizing, reset the width and height. Putting the width and height outside the canvasImage.onload function will make scaling smoother, but the image will flicker as you scale. Pick your poison.
             //onscreenCanvas.width = offscreenCanvas.width;
             //onscreenCanvas.height = offscreenCanvas.height;
             //Prevent blurring
-            onscreenDrawingContext.imageSmoothingEnabled = false;
+            onscreenDrawingContext.clearRect(0, 0, onscreenCanvas.width, onscreenCanvas.height);
+            onscreenDrawingContext.imageSmoothingEnabled = true;
             onscreenDrawingContext.drawImage(canvasImage,0,0,onscreenCanvas.width,onscreenCanvas.height)
         }
 
-        canvasImage.src = offscreenCanvas.toDataURL();;
+        canvasImage.src = offscreenCanvas.toDataURL();
     }
 
 </script>
@@ -97,5 +107,9 @@
 <style>
     .canvasContainer {
         width: 100%;
+    }
+
+    .canvas {
+
     }
 </style>
