@@ -1,29 +1,18 @@
 import * as Pizzicato from "pizzicato";
+import {sampleSize} from "../modules/WaveformCanvas.svelte";
 
 const SAMPLE_SIZE = 4096;
 let soundwave;
 let processedSampleLength;
 
 function getWaveData(waveform) {
-    // start at first zero crossing to enable drawing the wave "statically", always beginning at the same starting point
-    /*
-    const zeroIndex1 = getZeroCrossingIndex(waveform);
-    if (zeroIndex1 === -1) {
-        return waveform;
-    }
-
-    return waveform.slice(zeroIndex1);
-     */
-    const sampledPeriods = processedSampleLength * soundwave.frequency;
     const zeroIndexes = getZeroCrossingIndexes(waveform);
-    console.log({sampledPeriods, zeroIndexes})
     const { length: crossings } = zeroIndexes;
-    const lastCrossingIndex = Math.floor(sampledPeriods-1);
 
-    if (crossings > lastCrossingIndex) {
-        return waveform.slice(zeroIndexes[0], zeroIndexes[lastCrossingIndex]);
+    if (crossings > 1) {
+        return waveform.slice(zeroIndexes[0], zeroIndexes[1]);
     }
-    else if (crossings >= 1) {
+    else if (crossings === 1) {
         return waveform.slice(zeroIndexes[0]);
     }
     else {
@@ -48,16 +37,16 @@ function getZeroCrossingIndexes(waveformData) {
     return indexes;
 }
 
-function createAnalyser(soundWave) {
+function createAnalyser(soundWave, sampleSize) {
     const analyser = Pizzicato.context.createAnalyser();
-    analyser.fftSize = SAMPLE_SIZE;
+    analyser.fftSize = sampleSize;
 
     const waveform = new Float32Array(analyser.frequencyBinCount);
 
     soundWave.connect(analyser);
 
     const sampleRate = Pizzicato.context.sampleRate;
-    const samples = SAMPLE_SIZE / 2;
+    const samples = sampleSize / 2;
     processedSampleLength = samples / sampleRate; // 0.046
 
     soundwave = soundWave;

@@ -1,6 +1,7 @@
-<div class="knobContainer center">
+<div class="knobContainer">
+    <div class="label unselectable">{title}</div>
     <div class="knob center" style="--rotation: {rotation}" on:pointerdown={pointerDown}></div>
-    <div class="label unselectable">{value} Hz</div>
+    <div class="label unselectable">{outputValue ?? value} {unit}</div>
 </div>
 
 <script>
@@ -8,6 +9,9 @@
     export let rotRange = 2 * Math.PI * 0.83;
     export let pixelRange = 200;
     export let startRotation = -Math.PI * 0.83;
+    export let title = '';
+    export let unit = '';
+    export let outputValue = null;
 
     let startY, startValue;
     $: valueRange = max - min;
@@ -23,7 +27,6 @@
     }
 
     function pointerDown({ clientY }) {
-        console.log({ clientY });
         startY = clientY;
         startValue = value;
         window.addEventListener('pointermove', pointerMove);
@@ -40,8 +43,11 @@
 <style>
 
     .knobContainer {
-        width: fit-content;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         margin-bottom: 10px;
+        width: 120px;
     }
 
     .knob {
@@ -56,7 +62,7 @@
     }
 
     .label {
-        width: 80px;
+        margin: 5px;
     }
 </style>
 

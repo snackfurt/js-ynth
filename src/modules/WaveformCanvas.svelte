@@ -9,6 +9,7 @@
 
     export let doDrawing;
     export let soundWave;
+    export let sampleSize;
 
     let onscreenCanvas;
     let onscreenDrawingContext;
@@ -19,15 +20,23 @@
     let canvasImage;
     let canvasImageSource;
 
+    let isMounted = false;
+
     onMount(() => {
+        isMounted = true;
         init();
     });
-    afterUpdate(() => {
-        drawNextWaveform();
-    });
+
+    $: {
+        isMounted && sampleSize && init();
+    }
+    $: {
+        doDrawing && drawNextWaveform();
+    }
+
 
     function init() {
-        const { getWaveData, waveformLength } = createAnalyser(soundWave);
+        const { getWaveData, waveformLength } = createAnalyser(soundWave, sampleSize);
 
         offscreenCanvas = document.createElement('canvas');
         offscreenCanvas.width = waveformLength;
