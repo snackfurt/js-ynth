@@ -16,6 +16,7 @@
     let offscreenCanvas;
     let offscreenDrawingContext;
     let getSoundWaveData;
+    let waveformWidth;
 
     let canvasImage;
     let canvasImageSource;
@@ -38,17 +39,18 @@
     function init() {
         const { getWaveData, waveformLength } = createAnalyser(soundWave, sampleSize);
 
-        initOffscreenCanvas(waveformLength);
-        initOnscreenCanvas(waveformLength);
+        waveformWidth = waveformLength;
+
+        initOffscreenCanvas();
+        initOnscreenCanvas();
 
         getSoundWaveData = getWaveData;
 
         //setCanvasSize();
     }
 
-    function initOffscreenCanvas(waveformLength) {
+    function initOffscreenCanvas() {
         offscreenCanvas = document.createElement('canvas');
-        //offscreenCanvas.width = waveformLength;
         offscreenCanvas.width = document.querySelector('.canvasContainer').clientWidth;
         offscreenCanvas.height = offscreenCanvas.width * 0.33;
 
@@ -56,8 +58,7 @@
         canvasImageSource = offscreenCanvas.toDataURL();
     }
 
-    function initOnscreenCanvas(waveformLength) {
-        //onscreenCanvas.width = waveformLength;
+    function initOnscreenCanvas() {
         onscreenCanvas.width = document.querySelector('.canvasContainer').clientWidth;
         onscreenCanvas.height = onscreenCanvas.width * 0.33;
 
@@ -67,7 +68,7 @@
     function initDrawingContext(canvas) {
         const drawingContext = canvas.getContext('2d');
         drawingContext.strokeStyle = "#ff3e00";
-        drawingContext.lineWidth = 2;
+        drawingContext.lineWidth = 1;
 
         return drawingContext;
     }
@@ -83,7 +84,7 @@
         drawingContext.beginPath();
         drawingContext.moveTo(startX, startY);
 
-        const sliceWidth = width * 1.0 / bufferLength;
+        const sliceWidth = width * 1.0 / waveformWidth;
         let x = 0;
         let y, v;
 
@@ -135,9 +136,8 @@
     }
 
     function setCanvasSize() {
-        const { width, height } = onscreenCanvas.parentNode.getBoundingClientRect();
-        onscreenCanvas.width = width;
-        onscreenCanvas.height = width * 0.33;
+        onscreenCanvas.width = document.querySelector('.canvasContainer').clientWidth;
+        onscreenCanvas.height = onscreenCanvas.width * 0.33;
     }
 
     function renderImage() {
@@ -147,7 +147,7 @@
             //onscreenCanvas.height = offscreenCanvas.height;
             //Prevent blurring
             //onscreenDrawingContext.clearRect(0, 0, onscreenCanvas.width, onscreenCanvas.height);
-            onscreenDrawingContext.imageSmoothingEnabled = true;
+            onscreenDrawingContext.imageSmoothingEnabled = false;
             onscreenDrawingContext.drawImage(canvasImage,0,0,onscreenCanvas.width,onscreenCanvas.height)
         }
 
