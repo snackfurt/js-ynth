@@ -45,23 +45,18 @@
         initOnscreenCanvas();
 
         getSoundWaveData = getWaveData;
-
-        //setCanvasSize();
     }
 
     function initOffscreenCanvas() {
         offscreenCanvas = document.createElement('canvas');
-        offscreenCanvas.width = document.querySelector('.canvasContainer').clientWidth;
-        offscreenCanvas.height = offscreenCanvas.width * 0.33;
+        setCanvasSize(offscreenCanvas);
 
         canvasImage = new Image;
         canvasImageSource = offscreenCanvas.toDataURL();
     }
 
     function initOnscreenCanvas() {
-        onscreenCanvas.width = document.querySelector('.canvasContainer').clientWidth;
-        onscreenCanvas.height = onscreenCanvas.width * 0.33;
-
+        setCanvasSize(onscreenCanvas);
         onscreenDrawingContext = initDrawingContext(onscreenCanvas);
     }
 
@@ -75,43 +70,23 @@
 
     function drawWaveform(canvas) {
         const waveData = getSoundWaveData();
-        const { x: startX, y: startY } = getWavePointCoordsAtIndex(canvas, waveData, 0);
         const { width, height } = canvas;
-        const { length: bufferLength } = waveData;
+        const { x: startX, y: startY } = getWavePointCoordsAtIndex(waveData, 0, height);
+
 
         const drawingContext = initDrawingContext(canvas);
-        drawingContext.clearRect(0, 0, canvas.width, canvas.height);
+        drawingContext.clearRect(0, 0, width, height);
         drawingContext.beginPath();
         drawingContext.moveTo(startX, startY);
 
-        const sliceWidth = width * 1.0 / waveformWidth;
-        let x = 0;
-        let y, v;
+        const sampleWidth = width * 1.0 / waveformWidth;
 
-        for(let i = 0; i < bufferLength; i++) {
+        for(let i = 0; i < waveData.length; i++) {
 
-            //v = waveData[i] / 128.0;
-            //y = v * height / 2;
-            const { x: v, y } = getWavePointCoordsAtIndex(canvas, waveData, i);
-
-            if(i === 0) {
-                drawingContext.moveTo(x, y);
-            } else {
-                drawingContext.lineTo(x, y);
-            }
-
-            x += sliceWidth;
-        }
-
-        //drawingContext.lineTo(canvas.width, canvas.height / 2);
-
-
-        /*
-        for (let i = 1; i < waveData.length; i++) {
-            const { x, y } = getWavePointCoordsAtIndex(canvas, waveData, i);
+            const { x, y } = getWavePointCoordsAtIndex(waveData, i, canvas.height, sampleWidth);
             drawingContext.lineTo(x, y);
         }
-         */
+
         drawingContext.stroke();
 
         renderImage();
@@ -125,19 +100,19 @@
         }
     }
 
-    function getWavePointCoordsAtIndex(canvas, waveData, index) {
+    function getWavePointCoordsAtIndex(waveData, index, totalHeight, sampleWidth) {
         const padding = 100;   // avoid clipping of top points
         const yOffset = padding / 2;
-        const height = canvas.height - padding;
+        const height = totalHeight - padding;
         return {
-            x: index,
+            x: index * sampleWidth,
             y: yOffset + (0.5 + waveData[index] / 2) * height,
         }
     }
 
-    function setCanvasSize() {
-        onscreenCanvas.width = document.querySelector('.canvasContainer').clientWidth;
-        onscreenCanvas.height = onscreenCanvas.width * 0.33;
+    function setCanvasSize(canvas) {
+        canvas.width = document.querySelector('.canvasContainer').clientWidth;
+        canvas.height = canvas.width * 0.33;
     }
 
     function renderImage() {
