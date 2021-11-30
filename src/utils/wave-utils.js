@@ -1,23 +1,16 @@
 import * as Pizzicato from "pizzicato";
-import {sampleSize} from "../modules/WaveformCanvas.svelte";
 
-const SAMPLE_SIZE = 4096;
 let soundwave;
 let processedSampleLength;
 
 function getWaveData(waveform) {
-    const zeroIndexes = getZeroCrossingIndexes(waveform);
-    const { length: crossings } = zeroIndexes;
-
-    if (crossings > 1) {
-        return waveform.slice(zeroIndexes[0], zeroIndexes[1]);
-    }
-    else if (crossings === 1) {
-        return waveform.slice(zeroIndexes[0]);
-    }
-    else {
+    const zeroIndex1 = getZeroCrossingIndex(waveform);
+    if (zeroIndex1 === -1) {
         return waveform;
     }
+
+    return waveform.slice(zeroIndex1);
+
 }
 
 function getZeroCrossingIndex(waveformData) {

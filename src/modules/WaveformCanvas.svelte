@@ -4,7 +4,7 @@
 
 
 <script>
-    import { afterUpdate, onMount } from 'svelte';
+    import { onMount } from 'svelte';
     import { createAnalyser } from '../utils/wave-utils';
 
     export let doDrawing;
@@ -38,52 +38,65 @@
     function init() {
         const { getWaveData, waveformLength } = createAnalyser(soundWave, sampleSize);
 
+        //initOffscreenCanvas(waveformLength);
+        initOnscreenCanvas(waveformLength);
+        
+        getSoundWaveData = getWaveData;
+
+        //setCanvasSize();
+    }
+
+    function initOffscreenCanvas(waveformLength) {
         offscreenCanvas = document.createElement('canvas');
         offscreenCanvas.width = waveformLength;
         offscreenCanvas.height = offscreenCanvas.width * 0.33;
 
-        offscreenDrawingContext = offscreenCanvas.getContext('2d');
-        offscreenDrawingContext.strokeStyle = "#ff3e00";
-        offscreenDrawingContext.lineWidth = 3;
-
-        getSoundWaveData = getWaveData;
-
         canvasImage = new Image;
         canvasImageSource = offscreenCanvas.toDataURL();
-
-        onscreenDrawingContext = onscreenCanvas.getContext('2d');
-
-        setCanvasSize();
     }
 
-    function drawWaveform() {
+    function initOnscreenCanvas(waveformLength) {
+        onscreenCanvas.width = waveformLength;
+        onscreenCanvas.height = onscreenCanvas.width * 0.33;
+    }
+
+    function initDrawingContext(canvas) {
+        const drawingContext = canvas.getContext('2d');
+        drawingContext.strokeStyle = "#ff3e00";
+        drawingContext.lineWidth = 3;
+
+        return drawingContext;
+    }
+
+    function drawWaveform(canvas) {
         const waveData = getSoundWaveData();
-        const { x: startX, y: startY } = getWavePointCoordsAtIndex(waveData, 0);
+        const { x: startX, y: startY } = getWavePointCoordsAtIndex(canvas, waveData, 0);
 
-        offscreenDrawingContext.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
-        offscreenDrawingContext.beginPath();
-        offscreenDrawingContext.moveTo(startX, startY);
+        const drawingContext = initDrawingContext(canvas);
+        drawingContext.clearRect(0, 0, canvas.width, canvas.height);
+        drawingContext.beginPath();
+        drawingContext.moveTo(startX, startY);
         for (let i = 1; i < waveData.length; i++) {
-            const { x, y } = getWavePointCoordsAtIndex(waveData, i);
-            offscreenDrawingContext.lineTo(x, y);
+            const { x, y } = getWavePointCoordsAtIndex(canvas, waveData, i);
+            drawingContext.lineTo(x, y);
         }
-        offscreenDrawingContext.stroke();
+        drawingContext.stroke();
 
-        renderImage();
+        //renderImage();
 
         drawNextWaveform();
     }
 
     function drawNextWaveform() {
         if (doDrawing) {
-            requestAnimationFrame(drawWaveform);
+            requestAnimationFrame(() => drawWaveform(onscreenCanvas));
         }
     }
 
-    function getWavePointCoordsAtIndex(waveData, index) {
+    function getWavePointCoordsAtIndex(canvas, waveData, index) {
         const padding = 100;   // avoid clipping of top points
         const yOffset = padding / 2;
-        const height = offscreenCanvas.height - padding;
+        const height = canvas.height - padding;
         return {
             x: index,
             y: yOffset + (0.5 + waveData[index] / 2) * height,
