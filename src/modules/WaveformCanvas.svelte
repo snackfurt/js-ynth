@@ -10,9 +10,9 @@
     export let doDrawing;
     export let soundWave;
     export let sampleSize;
+    export let oldWavesDisplayed;
 
     const canvasImages = [];
-    const MAX_IMAGES = 10;
 
     let onscreenCanvas;
     let onscreenDrawingContext;
@@ -116,8 +116,8 @@
         const canvasImage = new Image();
 
         canvasImages.push(canvasImage);
-        if (canvasImages.length > MAX_IMAGES) {
-            const overflow = canvasImages.length - MAX_IMAGES;
+        if (canvasImages.length > oldWavesDisplayed) {
+            const overflow = canvasImages.length - oldWavesDisplayed;
             canvasImages.splice(0, overflow);
         }
 
@@ -129,8 +129,9 @@
         const { width, height } = onscreenCanvas;
         onscreenDrawingContext.clearRect(0, 0, width, height);
         onscreenDrawingContext.imageSmoothingEnabled = false;
+        const fadeUntil = oldWavesDisplayed / 3;
         canvasImages.forEach((image, index) => {
-            const opacity = Math.min((index+1) * 0.2, 1);
+            const opacity = Math.min((index+1) / fadeUntil, 1);
             onscreenDrawingContext.globalAlpha = opacity.toString(10);
             onscreenDrawingContext.drawImage(image, 0, 0, width, height);
         });

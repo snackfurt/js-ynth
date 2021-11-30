@@ -1,13 +1,14 @@
 <div class="panel">
     <Knob bind:value={frequency} title="FREQUENZ" unit="Hz" max={5000} min={60} pixelRange={200}/>
     <Knob bind:value={sampleSizeStep} title="SAMPLE SIZE" outputValue={sampleSize} max={10} min={0} pixelRange={200}/>
+    <Knob bind:value={oldWavesDisplayed} title="WAVES SHOWING" max={30} min={1} pixelRange={200}/>
 </div>
 
 <button class="unselectable" on:mousedown={startSound} on:mouseup={stopSound}>
     make a sound
 </button>
 
-<WaveformCanvas {soundWave} {doDrawing} {sampleSize}></WaveformCanvas>
+<WaveformCanvas {soundWave} {doDrawing} {sampleSize} {oldWavesDisplayed}></WaveformCanvas>
 
 
 <script>
@@ -21,6 +22,7 @@
     let frequency = 80;
     let sampleSize = 2048;
     let sampleSizeStep = 6;
+    let oldWavesDisplayed = 10;
 
     const SAMPLE_SIZES = [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768];
 
@@ -40,7 +42,7 @@
         isSoundPlaying = false;
         //TODO: find a timeout without magic number - it seems to be not the sound's release
         //const timeout = Math.max(soundWave.release * 1000, drawInterval);
-        const timeout = 300;
+        const timeout = 500;
         setTimeout(() => {
             doDrawing = isSoundPlaying;
         }, timeout);

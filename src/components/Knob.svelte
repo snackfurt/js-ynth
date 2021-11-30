@@ -47,7 +47,7 @@
         flex-direction: column;
         align-items: center;
         margin-bottom: 10px;
-        width: 120px;
+        width: 160px;
     }
 
     .knob {
