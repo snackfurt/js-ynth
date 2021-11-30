@@ -40,9 +40,9 @@
         isSoundPlaying = false;
         //TODO: find a timeout without magic number - it seems to be not the sound's release
         //const timeout = Math.max(soundWave.release * 1000, drawInterval);
-        const timeout = 150;
+        const timeout = 300;
         setTimeout(() => {
-            doDrawing = false;
+            doDrawing = isSoundPlaying;
         }, timeout);
     });
 

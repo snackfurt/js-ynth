@@ -11,15 +11,15 @@
     export let soundWave;
     export let sampleSize;
 
+    const canvasImages = [];
+    const MAX_IMAGES = 10;
+
     let onscreenCanvas;
     let onscreenDrawingContext;
     let offscreenCanvas;
     let offscreenDrawingContext;
     let getSoundWaveData;
     let waveformWidth;
-
-    let canvasImage;
-    let canvasImageSource;
 
     let isMounted = false;
 
@@ -50,9 +50,6 @@
     function initOffscreenCanvas() {
         offscreenCanvas = document.createElement('canvas');
         setCanvasSize(offscreenCanvas);
-
-        canvasImage = new Image;
-        canvasImageSource = offscreenCanvas.toDataURL();
     }
 
     function initOnscreenCanvas() {
@@ -116,17 +113,28 @@
     }
 
     function renderImage() {
-        canvasImage.onload = () => {
-            //if the image is being drawn due to resizing, reset the width and height. Putting the width and height outside the canvasImage.onload function will make scaling smoother, but the image will flicker as you scale. Pick your poison.
-            //onscreenCanvas.width = offscreenCanvas.width;
-            //onscreenCanvas.height = offscreenCanvas.height;
-            //Prevent blurring
-            //onscreenDrawingContext.clearRect(0, 0, onscreenCanvas.width, onscreenCanvas.height);
-            onscreenDrawingContext.imageSmoothingEnabled = false;
-            onscreenDrawingContext.drawImage(canvasImage,0,0,onscreenCanvas.width,onscreenCanvas.height)
+        const canvasImage = new Image();
+
+        canvasImages.push(canvasImage);
+        if (canvasImages.length > MAX_IMAGES) {
+            const overflow = canvasImages.length - MAX_IMAGES;
+            canvasImages.splice(0, overflow);
         }
 
+        canvasImage.onload = drawImages;
         canvasImage.src = offscreenCanvas.toDataURL();
+    }
+
+    function drawImages() {
+        const { width, height } = onscreenCanvas;
+        onscreenDrawingContext.clearRect(0, 0, width, height);
+        onscreenDrawingContext.imageSmoothingEnabled = false;
+        canvasImages.forEach((image, index) => {
+            const opacity = Math.min((index+1) * 0.2, 1);
+            onscreenDrawingContext.globalAlpha = opacity.toString(10);
+            onscreenDrawingContext.drawImage(image, 0, 0, width, height);
+        });
+        onscreenDrawingContext.globalAlpha = 1;
     }
 
 </script>
