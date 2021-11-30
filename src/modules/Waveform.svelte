@@ -20,8 +20,8 @@
     let isSoundPlaying = false;
     let doDrawing = false;
     let frequency = 80;
-    let sampleSize = 2048;
-    let sampleSizeStep = 6;
+    let sampleSizeStep = 7;
+    let sampleSize;
     let oldWavesDisplayed = 10;
 
     const SAMPLE_SIZES = [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768];

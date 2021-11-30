@@ -39,7 +39,7 @@
     function init() {
         const { getWaveData, waveformLength } = createAnalyser(soundWave, sampleSize);
 
-        waveformWidth = waveformLength;
+        waveformWidth = waveformLength * 0.75
 
         initOffscreenCanvas();
         initOnscreenCanvas();
@@ -128,7 +128,7 @@
     function drawImages() {
         const { width, height } = onscreenCanvas;
         onscreenDrawingContext.clearRect(0, 0, width, height);
-        onscreenDrawingContext.imageSmoothingEnabled = false;
+        onscreenDrawingContext.imageSmoothingEnabled = true;
         const fadeUntil = oldWavesDisplayed / 3;
         canvasImages.forEach((image, index) => {
             const opacity = Math.min((index+1) / fadeUntil, 1);
