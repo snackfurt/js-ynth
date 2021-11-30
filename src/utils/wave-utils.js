@@ -4,13 +4,15 @@ let soundwave;
 let processedSampleLength;
 
 function getWaveData(waveform) {
+    /*
     const zeroIndex1 = getZeroCrossingIndex(waveform);
     if (zeroIndex1 === -1) {
         return waveform;
     }
 
     return waveform.slice(zeroIndex1);
-
+    */
+    return waveform;
 }
 
 function getZeroCrossingIndex(waveformData) {

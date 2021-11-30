@@ -1,4 +1,4 @@
-<div class="canvasContainer">
+<div class="canvasContainer center">
     <canvas class="canvas" bind:this={onscreenCanvas}></canvas>
 </div>
 
@@ -38,9 +38,9 @@
     function init() {
         const { getWaveData, waveformLength } = createAnalyser(soundWave, sampleSize);
 
-        //initOffscreenCanvas(waveformLength);
+        initOffscreenCanvas(waveformLength);
         initOnscreenCanvas(waveformLength);
-        
+
         getSoundWaveData = getWaveData;
 
         //setCanvasSize();
@@ -48,7 +48,8 @@
 
     function initOffscreenCanvas(waveformLength) {
         offscreenCanvas = document.createElement('canvas');
-        offscreenCanvas.width = waveformLength;
+        //offscreenCanvas.width = waveformLength;
+        offscreenCanvas.width = document.querySelector('.canvasContainer').clientWidth;
         offscreenCanvas.height = offscreenCanvas.width * 0.33;
 
         canvasImage = new Image;
@@ -56,14 +57,17 @@
     }
 
     function initOnscreenCanvas(waveformLength) {
-        onscreenCanvas.width = waveformLength;
+        //onscreenCanvas.width = waveformLength;
+        onscreenCanvas.width = document.querySelector('.canvasContainer').clientWidth;
         onscreenCanvas.height = onscreenCanvas.width * 0.33;
+
+        onscreenDrawingContext = initDrawingContext(onscreenCanvas);
     }
 
     function initDrawingContext(canvas) {
         const drawingContext = canvas.getContext('2d');
         drawingContext.strokeStyle = "#ff3e00";
-        drawingContext.lineWidth = 3;
+        drawingContext.lineWidth = 2;
 
         return drawingContext;
     }
@@ -71,25 +75,52 @@
     function drawWaveform(canvas) {
         const waveData = getSoundWaveData();
         const { x: startX, y: startY } = getWavePointCoordsAtIndex(canvas, waveData, 0);
+        const { width, height } = canvas;
+        const { length: bufferLength } = waveData;
 
         const drawingContext = initDrawingContext(canvas);
         drawingContext.clearRect(0, 0, canvas.width, canvas.height);
         drawingContext.beginPath();
         drawingContext.moveTo(startX, startY);
+
+        const sliceWidth = width * 1.0 / bufferLength;
+        let x = 0;
+        let y, v;
+
+        for(let i = 0; i < bufferLength; i++) {
+
+            //v = waveData[i] / 128.0;
+            //y = v * height / 2;
+            const { x: v, y } = getWavePointCoordsAtIndex(canvas, waveData, i);
+
+            if(i === 0) {
+                drawingContext.moveTo(x, y);
+            } else {
+                drawingContext.lineTo(x, y);
+            }
+
+            x += sliceWidth;
+        }
+
+        //drawingContext.lineTo(canvas.width, canvas.height / 2);
+
+
+        /*
         for (let i = 1; i < waveData.length; i++) {
             const { x, y } = getWavePointCoordsAtIndex(canvas, waveData, i);
             drawingContext.lineTo(x, y);
         }
+         */
         drawingContext.stroke();
 
-        //renderImage();
+        renderImage();
 
         drawNextWaveform();
     }
 
     function drawNextWaveform() {
         if (doDrawing) {
-            requestAnimationFrame(() => drawWaveform(onscreenCanvas));
+            requestAnimationFrame(() => drawWaveform(offscreenCanvas));
         }
     }
 
@@ -115,7 +146,7 @@
             //onscreenCanvas.width = offscreenCanvas.width;
             //onscreenCanvas.height = offscreenCanvas.height;
             //Prevent blurring
-            onscreenDrawingContext.clearRect(0, 0, onscreenCanvas.width, onscreenCanvas.height);
+            //onscreenDrawingContext.clearRect(0, 0, onscreenCanvas.width, onscreenCanvas.height);
             onscreenDrawingContext.imageSmoothingEnabled = true;
             onscreenDrawingContext.drawImage(canvasImage,0,0,onscreenCanvas.width,onscreenCanvas.height)
         }
@@ -128,7 +159,7 @@
 
 <style>
     .canvasContainer {
-        width: 100%;
+        width: 80%;
     }
 
     .canvas {
