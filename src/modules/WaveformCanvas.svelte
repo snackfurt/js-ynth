@@ -28,12 +28,9 @@
         init();
     });
 
-    $: {
-        isMounted && sampleSize && init();
-    }
-    $: {
-        doDrawing && drawNextWaveform();
-    }
+    // init new if sampleSize or soundWave changes
+    $: isMounted && sampleSize && soundWave && init();
+    $: doDrawing && drawNextWaveform();
 
 
     function init() {
