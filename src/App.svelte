@@ -1,12 +1,39 @@
-<script>
-
-import Waveform from './modules/Waveform.svelte';
-</script>
-
 <main>
 	<h1 class="unselectable">Hello</h1>
-	<Waveform />
+	<ViewControls bind:sampleSize={sampleSize} bind:oldWavesDisplayed={oldWavesDisplayed} />
+	<WaveformCanvas {doDrawing} {sampleSize} {oldWavesDisplayed} />
+	<button class="unselectable" on:mousedown={startSound} on:mouseup={stopSound}>
+		make a sound
+	</button>
+	<Waveform bind:soundWave={sound1}/>
+	<Waveform bind:soundWave={sound2}/>
 </main>
+
+
+<script>
+	import Waveform from './modules/Waveform.svelte';
+	import WaveformCanvas from './modules/WaveformCanvas.svelte';
+	import ViewControls from './modules/ViewControls.svelte';
+
+	let doDrawing = true;
+	let sampleSize;
+	let oldWavesDisplayed;
+	let sound1;
+	let sound2;
+
+	const sounds = [sound1, sound2];
+
+	function startSound() {
+		sound1.play();
+		sound2.play();
+	}
+
+	function stopSound() {
+		sound1.stop();
+		sound2.stop();
+	}
+</script>
+
 
 <style>
 	:global(.unselectable) {

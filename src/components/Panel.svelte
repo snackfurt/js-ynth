@@ -1,4 +1,4 @@
-<button class:active={isOpen} class="panel-header" on:click={() => isOpen = !isOpen}>
+<button class:active={isOpen} class="panel-header unselectable" on:click={() => isOpen = !isOpen}>
     <span class="heading">{heading}</span>
     {#if isOpen}
         <span class="icon">&minus;</span>

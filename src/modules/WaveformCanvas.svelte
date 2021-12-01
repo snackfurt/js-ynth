@@ -4,11 +4,11 @@
 
 
 <script>
+    import * as Pizzicato from 'pizzicato';
     import { onMount } from 'svelte';
     import { createAnalyser } from '../utils/wave-utils';
 
     export let doDrawing;
-    export let soundWave;
     export let sampleSize;
     export let oldWavesDisplayed;
 
@@ -25,16 +25,15 @@
 
     onMount(() => {
         isMounted = true;
-        init();
     });
 
-    // init new if sampleSize or soundWave changes
-    $: isMounted && sampleSize && soundWave && init();
+    // init new if sampleSize changes
+    $: isMounted && sampleSize && init();
     $: doDrawing && drawNextWaveform();
 
 
     function init() {
-        const { getWaveData, waveformLength } = createAnalyser(soundWave, sampleSize);
+        const { getWaveData, waveformLength } = createAnalyser(Pizzicato.masterGainNode, sampleSize);
 
         waveformWidth = waveformLength * 0.75
 
