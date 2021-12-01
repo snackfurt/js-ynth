@@ -1,9 +1,11 @@
-<div class="panel">
+<Panel heading="SOUND PARAMETERS" isOpen={true}>
     <Knob bind:value={waveTypeStep} title="WAVE TYPE" outputValue={waveType} max={4} min={1} pixelRange={200}/>
     <Knob bind:value={frequency} title="FREQUENCY" unit="Hz" max={5000} min={60} pixelRange={200}/>
+</Panel>
+<Panel heading="VIEW PARAMETERS" isOpen={true}>
     <Knob bind:value={sampleSizeStep} title="SAMPLE SIZE" outputValue={sampleSize} max={10} min={0} pixelRange={200}/>
     <Knob bind:value={oldWavesDisplayed} title="WAVES SHOWING" max={30} min={1} pixelRange={200}/>
-</div>
+</Panel>
 
 <button class="unselectable" on:mousedown={startSound} on:mouseup={stopSound}>
     make a sound
@@ -15,7 +17,8 @@
 <script>
     import * as Pizzicato from 'pizzicato';
     import WaveformCanvas from './WaveformCanvas.svelte';
-    import Knob from "../components/Knob.svelte";
+    import Panel from '../components/Panel.svelte';
+    import Knob from '../components/Knob.svelte';
 
     let isSoundPlaying = false;
     let doDrawing = false;
@@ -85,9 +88,4 @@
 
 
 <style>
-    .panel {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-    }
 </style>
