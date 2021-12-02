@@ -9,22 +9,22 @@
 		add a sound
 	</button>
 	{#each sounds as sound}
-		<Soundwave bind:soundWave={sound} removeHandler={() => removeSound(sound)}/>
+		<SoundwaveControls bind:sound={sound} removeHandler={() => removeSound(sound)}/>
 	{/each}
 </main>
 
 
 <script>
-	import Soundwave from './modules/Soundwave.svelte';
+	import SoundwaveControls from './modules/SoundwaveControls.svelte';
 	import WaveformCanvas from './modules/WaveformCanvas.svelte';
 	import ViewControls from './modules/ViewControls.svelte';
+	import Sound from './utils/Sound';
 
 	let doDrawing = true;
 	let sampleSize;
 	let oldWavesDisplayed;
 
-	let initialSound;
-	let sounds = [initialSound];
+	let sounds = [new Sound()];
 
 
 	function startSound() {
@@ -36,15 +36,15 @@
 	}
 
 	function addSound() {
-		sounds = sounds.concat(null);
+		sounds = sounds.concat(new Sound());
 	}
 
 	function removeSound(sound) {
 		const index = sounds.indexOf(sound);
-		console.log('removeSound', sound, index);
 
 		if (index > -1) {
 			const { [index]:removedSound, ...remainingSounds } = sounds;
+			removedSound.remove();
 			sounds = Object.values(remainingSounds);
 		}
 	}

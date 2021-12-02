@@ -1,6 +1,5 @@
 import * as Pizzicato from "pizzicato";
 
-let soundwave;
 let processedSampleLength;
 
 function getWaveData(waveform) {
@@ -44,8 +43,6 @@ function createAnalyser(soundWave, sampleSize) {
     const samples = sampleSize / 2;
     processedSampleLength = samples / sampleRate; // 0.046
 
-    soundwave = soundWave;
-
     return {
         waveformLength: waveform.length,
         getWaveData: () => {
@@ -58,6 +55,7 @@ function createAnalyser(soundWave, sampleSize) {
         }
     }
 }
+
 
 export {
     createAnalyser,

@@ -1,4 +1,4 @@
-<Panel heading="SOUNDWAVE" isOpen={true} removeHandler={() => removeHandler(soundWave)}>
+<Panel heading="SOUNDWAVE" isOpen={true} removeHandler={() => removeHandler(sound)}>
     <Knob bind:value={waveTypeStep} title="WAVE TYPE" outputValue={waveType} max={4} min={1} pixelRange={200}/>
     <Knob bind:value={frequency} title="FREQUENCY" unit="Hz" max={5000} min={60} pixelRange={200}/>
 </Panel>
@@ -7,9 +7,9 @@
 <script>
     import Panel from '../components/Panel.svelte';
     import Knob from '../components/Knob.svelte';
-    import { createSound } from '../utils/soundsystem';
+    import {createSound, removeSound} from '../utils/soundsystem';
 
-    export let soundWave;
+    export let sound;
     export let removeHandler;
 
     let frequency = 80;
@@ -21,13 +21,11 @@
     initSoundWave();
 
     function initSoundWave() {
-        if (soundWave) {
-            soundWave.off();
-            soundWave.stop();
-            soundWave.disconnect();
-        }
+        const { soundwave } = sound;
+        const isPlaying = soundwave ? soundwave.playing : false;
+        removeSound(soundwave);
 
-        soundWave = createSound(waveType, frequency);
+        sound.soundwave = createSound(waveType, frequency);
 
         /*
         soundWave.on('play', () => {
@@ -44,14 +42,14 @@
                 doDrawing = isSoundPlaying;
             }, timeout);
         });
+        */
 
-        if (isSoundPlaying) {
-            soundWave.play();
+        if (isPlaying) {
+            sound.soundwave.play();
         }
-         */
     }
 
-    $: soundWave.frequency = frequency;
+    $: sound.soundwave.frequency = frequency;
     $: {
         waveType = WAVE_TYPES[waveTypeStep-1];
         initSoundWave();

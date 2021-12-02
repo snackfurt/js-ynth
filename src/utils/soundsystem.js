@@ -26,6 +26,15 @@ function createSound(type, frequency) {
     return sound;
 }
 
+function removeSound(sound) {
+    if (sound) {
+        sound.off();
+        sound.stop();
+        sound.disconnect();
+    }
+}
+
 export {
     createSound,
+    removeSound,
 }
