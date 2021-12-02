@@ -1,4 +1,4 @@
-<Panel heading="SOUND PARAMETERS" isOpen={true}>
+<Panel heading="SOUNDWAVE" isOpen={true}>
     <Knob bind:value={waveTypeStep} title="WAVE TYPE" outputValue={waveType} max={4} min={1} pixelRange={200}/>
     <Knob bind:value={frequency} title="FREQUENCY" unit="Hz" max={5000} min={60} pixelRange={200}/>
 </Panel>
@@ -60,4 +60,5 @@
 
 
 <style>
+
 </style>

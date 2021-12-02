@@ -5,13 +5,13 @@
 	<button class="unselectable" on:mousedown={startSound} on:mouseup={stopSound}>
 		make a sound
 	</button>
-	<Waveform bind:soundWave={sound1}/>
-	<Waveform bind:soundWave={sound2}/>
+	<Soundwave bind:soundWave={sound1}/>
+	<Soundwave bind:soundWave={sound2}/>
 </main>
 
 
 <script>
-	import Waveform from './modules/Waveform.svelte';
+	import Soundwave from './modules/Soundwave.svelte';
 	import WaveformCanvas from './modules/WaveformCanvas.svelte';
 	import ViewControls from './modules/ViewControls.svelte';
 
