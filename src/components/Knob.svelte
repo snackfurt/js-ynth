@@ -1,4 +1,4 @@
-<div class="knobContainer unselectable">
+<div class="knobContainer">
     <div class="label">{title}</div>
     <div class="knob center" style="--rotation: {rotation}" on:pointerdown={knobClicked}></div>
     <div class="label">{outputValue ?? value} {unit}</div>

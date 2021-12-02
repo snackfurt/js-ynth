@@ -1,4 +1,4 @@
-<Panel heading="SOUNDWAVE" isOpen={true}>
+<Panel heading="SOUNDWAVE" isOpen={true} removeHandler={() => removeHandler(soundWave)}>
     <Knob bind:value={waveTypeStep} title="WAVE TYPE" outputValue={waveType} max={4} min={1} pixelRange={200}/>
     <Knob bind:value={frequency} title="FREQUENCY" unit="Hz" max={5000} min={60} pixelRange={200}/>
 </Panel>
@@ -10,6 +10,7 @@
     import { createSound } from '../utils/soundsystem';
 
     export let soundWave;
+    export let removeHandler;
 
     let frequency = 80;
     let waveTypeStep = 1;

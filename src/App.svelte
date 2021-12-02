@@ -1,12 +1,16 @@
-<main>
-	<h1 class="unselectable">Hello</h1>
+<main class="unselectable">
+	<h1>JS SYNTH</h1>
 	<ViewControls bind:sampleSize={sampleSize} bind:oldWavesDisplayed={oldWavesDisplayed} />
 	<WaveformCanvas {doDrawing} {sampleSize} {oldWavesDisplayed} />
-	<button class="unselectable" on:mousedown={startSound} on:mouseup={stopSound}>
+	<button on:mousedown={startSound} on:mouseup={stopSound}>
 		make a sound
 	</button>
-	<Soundwave bind:soundWave={sound1}/>
-	<Soundwave bind:soundWave={sound2}/>
+	<button on:click={addSound}>
+		add a sound
+	</button>
+	{#each sounds as sound}
+		<Soundwave bind:soundWave={sound} removeHandler={() => removeSound(sound)}/>
+	{/each}
 </main>
 
 
@@ -18,48 +22,55 @@
 	let doDrawing = true;
 	let sampleSize;
 	let oldWavesDisplayed;
-	let sound1;
-	let sound2;
 
-	const sounds = [sound1, sound2];
+	let initialSound;
+	let sounds = [initialSound];
+
 
 	function startSound() {
-		sound1.play();
-		sound2.play();
+		sounds.forEach(sound => sound.play());
 	}
 
 	function stopSound() {
-		sound1.stop();
-		sound2.stop();
+		sounds.forEach(sound => sound.stop());
+	}
+
+	function addSound() {
+		sounds = sounds.concat(null);
+	}
+
+	function removeSound(sound) {
+		const index = sounds.indexOf(sound);
+		console.log('removeSound', sound, index);
+
+		if (index > -1) {
+			const { [index]:removedSound, ...remainingSounds } = sounds;
+			sounds = Object.values(remainingSounds);
+		}
 	}
 </script>
 
 
 <style>
-	:global(.unselectable) {
-		user-select: none;
-	}
-
 	:global(.center) {
 		margin: 0 auto;
 	}
 
 	main {
 		text-align: center;
-		max-width: 240px;
 		margin: 0 auto;
+		user-select: none;
 	}
 
 	h1 {
 		color: #ff3e00;
 		text-transform: uppercase;
-		font-size: 4em;
+		font-size: 2em;
 		font-weight: 100;
 	}
 
-	@media (min-width: 640px) {
-		main {
-			max-width: none;
-		}
+	:global(button:active) {
+		background: #f4f4f4;
 	}
+
 </style>

@@ -1,44 +1,44 @@
-<button class:active={isOpen} class="panel-header unselectable" on:click={() => isOpen = !isOpen}>
-    <span class="heading">{heading}</span>
-    {#if isOpen}
-        <span class="icon">&minus;</span>
-    {:else}
-        <span class="icon">&plus;</span>
-    {/if}
-</button>
+<div class="panel">
+    <div class="panel-header">
+        {#if removeHandler}
+            <button class="remove-button" on:click={removeHandler}>&#10060;</button>
+        {/if}
+        <button class="panel-button" on:click={() => isOpen = !isOpen}>
+            <span class="heading">{heading}</span>
+            {#if isOpen}
+                <span class="icon">&mapstoup;</span>
+            {:else}
+                <span class="icon">&mapstodown;</span>
+            {/if}
+        </button>
+    </div>
 
-<section class:open-panel={isOpen} class="panel-content">
-    <slot></slot>
-</section>
+    <section class:open-panel={isOpen} class="panel-content">
+        <slot></slot>
+    </section>
+</div>
 
 
 <script>
     export let heading;
     export let isOpen;
+    export let removeHandler;
 </script>
 
 
 <style>
-    button.panel-header {
-        width: 100%;
-        padding: 5px;
+    .panel-header {
         margin: 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background-color: white;
-        color: #ff3e00;
-        text-align: left;
         border: 1px solid #ff3e00;
-        cursor: pointer;
         transition: .3s;
+        display: flex;
     }
 
     .heading {
         font-size: 1rem;
     }
 
-    span.icon {
+    .icon {
         font-size: 1.2rem;
     }
 
@@ -52,6 +52,29 @@
         margin-top: -1px;
         margin-bottom: 5px;
         border: none;
+    }
+
+    .panel-button {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: white;
+        color: #ff3e00;
+        text-align: left;
+        border: none;
+    }
+
+    .remove-button {
+        height: 26px;
+        width: 26px;
+        border: 1px solid #ff3e00;
+        background: none;
+        font-size: 0.6em;
+        margin-left: 5px;
+        margin-top: 6px;
+        margin-bottom: 0;
+        padding-left: 2px;
     }
 
     .open-panel {
