@@ -20,7 +20,8 @@
 	import ViewControls from './modules/ViewControls.svelte';
 	import Sound from './utils/Sound';
 
-	let doDrawing = true;
+	let isSoundPlaying = false
+	let doDrawing = false;
 	let sampleSize;
 	let oldWavesDisplayed;
 
@@ -28,11 +29,20 @@
 
 
 	function startSound() {
+		isSoundPlaying = true;
+		doDrawing = true;
 		sounds.forEach(sound => sound.play());
 	}
 
 	function stopSound() {
 		sounds.forEach(sound => sound.stop());
+		isSoundPlaying = false;
+		//TODO: find a timeout without magic number - it seems to be not the sound's release
+		//const timeout = Math.max(soundWave.release * 1000, drawInterval);
+		const timeout = 600;
+		setTimeout(() => {
+			doDrawing = isSoundPlaying;
+		}, timeout);
 	}
 
 	function addSound() {
