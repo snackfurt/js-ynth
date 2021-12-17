@@ -1,14 +1,38 @@
 import * as Pizzicato from 'pizzicato';
 
 const sounds = [];
-const limiter = new Pizzicato.Effects.Compressor();
-const preGain = Pizzicato.context.createGain();
 
-init();
+let limiter;
+let preGain;
+let processor;
 
-function init() {
+async function init(drawCallback) {
+    limiter = new Pizzicato.Effects.Compressor();
+    preGain = Pizzicato.context.createGain();
+    processor = await createProcessor(drawCallback);
+
     preGain.connect(limiter);
-    limiter.connect(Pizzicato.masterGainNode);
+    limiter.connect(processor);
+    processor.connect(Pizzicato.masterGainNode);
+}
+
+async function createProcessor(drawCallback) {
+    const audioContext = Pizzicato.context;
+    await audioContext.audioWorklet.addModule('utils/SoundwaveProcessor.js');
+    const processorOptions = {
+        mainGain: Pizzicato.masterGainNode.gain.value,
+        sweepMsDiv: 1,
+        sweepTriggerValue: 0,
+        timePerSample: 1 / audioContext.sampleRate,
+    }
+    const processorNode = new AudioWorkletNode(audioContext, 'soundwave-processor', {processorOptions});
+    //processorNode.port.postMessage('ping');
+    processorNode.port.onmessage = (e) => {
+        //console.log('soundsystem.onMessage:', e.data);
+        drawCallback(e.data);
+    }
+
+    return processorNode;
 }
 
 function createSound(type, frequency) {
@@ -34,7 +58,13 @@ function removeSound(sound) {
     }
 }
 
+function getProcessor() {
+    return processor;
+}
+
 export {
+    init,
     createSound,
     removeSound,
+    getProcessor,
 }
