@@ -208,8 +208,8 @@ export default class OscilloscopeRenderer {
 
         for (let j=0; j<51; j++)
         {
-            const t = j*step/5;
-            if (t%5 == 0) continue;
+            t = j*step/5;
+            if (t%5 === 0) continue;
             data.splice(0,0, t-2, 2.5*step, t+2, 2.5*step);
             data.splice(0,0, t-2, 7.5*step, t+2, 7.5*step);
         }
