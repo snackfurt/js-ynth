@@ -8,7 +8,15 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
 
         this.port.onmessage = this.onMessage;
 
-        this.sweepPosition = -1;
+        this.sampleTime = 1 / this.options.sampleRate;              // 1 / 44100 = 0,00002267573696 s
+        this.frameTime = 1 / 60;                                    // 1/ 60 = 0,01666666667
+        this.sweepMinTime = 1 / 20;                                 // ms per drawn sample (?)
+        this.lastDraw = 0;
+
+        this.samplesX = [];
+        this.samplesY = [];
+
+        this.sweepPosition = 0;
         this.belowTrigger = false;
     }
 
@@ -26,7 +34,7 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
         const input = inputs[0];
         const output = outputs[0];
 
-        // just copy over input to output to bypass the sound to the next audio node
+        // copy over input to output to bypass the sound to the next audio node
         for (let channel = 0; channel < output.length; ++channel) {
             const inChannel = input[channel];
             const outChannel = output[channel];
@@ -38,95 +46,62 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
             }
         }
 
-        // just continue processing if no data available
-        if (!input[0]) {
-            return true;
-        }
+        if (input[0]) {
 
-        // now analyze
-        const xSamplesRaw = input[0];
-        const ySamplesRaw = input[1];
-        const xOut = output[0];
-        const yOut = output[1];
+            // now analyze
+            const xSamplesRaw = input[0];
+            const ySamplesRaw = input[1];
 
-        const xSamples = new Float32Array(512);
-        const ySamples = new Float32Array(512);
+            // this.postMessage({xSamples: xSamplesRaw, ySamples: ySamplesRaw, mainGain: this.options.mainGain});
+            // return true;
 
-        const length = xSamplesRaw.length;
-        for (let i=0; i < length; i++)
-        {
-            xSamples[i] = xSamplesRaw[i];
-            ySamples[i] = ySamplesRaw[i];
-        }
 
-        const gain = Math.pow(2.0, this.options.mainGain);
-        const sweepMinTime = this.options.sweepMsDiv * 10 / 1000;
-        const triggerValue = this.options.sweepTriggerValue / gain;
-        const samplesPerSweep = 2 * this.options.timePerSample / sweepMinTime;
+            const length = xSamplesRaw.length;
 
-        for (let i=0; i < length; i++)
-        {
-            this.sweepPosition += samplesPerSweep;
-            if (this.sweepPosition > 1.1 && this.belowTrigger && ySamples[i] >= triggerValue)
-            {
-                if (i == 0) {
-                    //don't bother to calculate
-                    this.sweepPosition = -1;
-                }
-                else {
-                    const delta = (ySamples[i] - triggerValue) / (ySamples[i] - ySamples[i-1]);
-                    this.sweepPosition = -1 + delta * samplesPerSweep;
-                }
+            const xSamples = new Float32Array(length);
+            const ySamples = new Float32Array(length);
+
+            for (let i = 0; i < length; i++) {
+                xSamples[i] = xSamplesRaw[i];
+                ySamples[i] = ySamplesRaw[i];
             }
-            xSamples[i] = this.sweepPosition / gain;
-            this.belowTrigger = ySamples[i] < triggerValue;
-        }
 
-        /*
-        if (!controls.disableFilter)
-        {
-            Filter.generateSmoothedSamples(AudioSystem.oldYSamples, ySamples, AudioSystem.smoothedYSamples);
-            if (!controls.sweepOn) Filter.generateSmoothedSamples(AudioSystem.oldXSamples, xSamples, AudioSystem.smoothedXSamples);
-            else
-            {
-                const xS = AudioSystem.smoothedXSamples;
-                const yS = AudioSystem.smoothedYSamples;
-                const gain = Math.pow(2.0,controls.mainGain);
-                const sweepMinTime = controls.sweepMsDiv*10/1000;
-                const triggerValue = controls.sweepTriggerValue/gain;
-                const smoothedLength = AudioSystem.smoothedYSamples.length;
-                const timeIncrement = 2*AudioSystem.timePerSample/(sweepMinTime*Filter.steps);
-                for (let i=0; i<smoothedLength; i++)
-                {
-                    sweepPosition += timeIncrement;
-                    if (sweepPosition > 1.1 && belowTrigger && yS[i]>=triggerValue)
-                        sweepPosition =-1;
-                    xS[i] = sweepPosition / gain;
-                    belowTrigger = yS[i]<triggerValue;
+            const triggerValue = 0;
+            const samplesPerSweep = 2 * this.sampleTime / this.sweepMinTime;
+
+            for (let i = 0; i < length; i++) {
+                this.sweepPosition += samplesPerSweep;
+                if (this.sweepPosition > 1.1 && this.belowTrigger && ySamples[i] >= triggerValue) {
+                    if (i == 0) {
+                        //don't bother to calculate
+                        this.sweepPosition = -1;
+                    } else {
+                        const delta = (ySamples[i] - triggerValue) / (ySamples[i] - ySamples[i - 1]);
+                        this.sweepPosition = -1 + delta * samplesPerSweep;
+                    }
                 }
+                xSamples[i] = this.sweepPosition;
+                this.belowTrigger = ySamples[i] < triggerValue;
             }
-            if (!controls.swapXY) Render.drawLineTexture(AudioSystem.smoothedXSamples, AudioSystem.smoothedYSamples);
-            else Render.drawLineTexture(AudioSystem.smoothedYSamples, AudioSystem.smoothedXSamples);
-        }
-        else
-         */
-        {
-            //Render.drawLineTexture(xSamples, ySamples);
-            this.postMessage({xSamples, ySamples, mainGain: this.options.mainGain});
-            //Render.drawLineTexture(ySamples, xSamples);
+
+            //this.postMessage({xSamples, ySamples});
+
+            this.samplesX.push(...xSamples);
+            this.samplesY.push(...ySamples);
         }
 
-        /*
-        for (let i = 0; i<length; i++)
-        {
-            AudioSystem.oldXSamples[i] = xSamples[i];
-            AudioSystem.oldYSamples[i] = ySamples[i];
-            xOut[i] = xSamplesRaw[i];
-            yOut[i] = ySamplesRaw[i];
+        const now = new Date().getTime();
+        const timeElapsed = now - this.lastDraw;
+
+        if (timeElapsed >= this.frameTime) {
+            this.postMessage({xSamples: this.samplesX, ySamples: this.samplesY});
+            this.samplesX = [];
+            this.samplesY = [];
+            this.lastDraw = now;
+            console.timeEnd('sample');
+            console.time('sample')
         }
 
-        AudioSystem.audioVolumeNode.gain.value = controls.audioVolume;
-         */
 
         return true;
     }

@@ -21,9 +21,7 @@ async function createProcessor(drawCallback) {
     await audioContext.audioWorklet.addModule('utils/SoundwaveProcessor.js');
     const processorOptions = {
         mainGain: Pizzicato.masterGainNode.gain.value,
-        sweepMsDiv: 1,
-        sweepTriggerValue: 0,
-        timePerSample: 1 / audioContext.sampleRate,
+        sampleRate: audioContext.sampleRate,
     }
     const processorNode = new AudioWorkletNode(audioContext, 'soundwave-processor', {processorOptions});
     //processorNode.port.postMessage('ping');

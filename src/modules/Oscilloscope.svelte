@@ -15,7 +15,6 @@
     import {supportsWebGl} from '../utils/supportsWebGl';
     import OscilloscopeRenderer from '../oscilloscope/OscilloscopeRenderer';
     import {getProcessor} from '../utils/soundsystem';
-    import {main} from "../utils/RendererTest";
 
     let canvas;
     let canvasContainer;
@@ -35,7 +34,6 @@
         setCanvasSize(canvas);
         renderer = new OscilloscopeRenderer(canvas);
         renderer.init();
-        //main();
     }
 
     function setCanvasSize(canvas) {
