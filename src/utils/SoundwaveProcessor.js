@@ -16,7 +16,7 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
         this.samplesX = [];
         this.samplesY = [];
 
-        this.sweepPosition = 0;
+        this.sweepPosition = -1;
         this.belowTrigger = false;
     }
 
@@ -72,7 +72,7 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
             for (let i = 0; i < length; i++) {
                 this.sweepPosition += samplesPerSweep;
                 if (this.sweepPosition > 1.1 && this.belowTrigger && ySamples[i] >= triggerValue) {
-                    if (i == 0) {
+                    if (i === 0) {
                         //don't bother to calculate
                         this.sweepPosition = -1;
                     } else {
