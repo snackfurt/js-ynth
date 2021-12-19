@@ -10,11 +10,14 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
 
         this.sampleTime = 1 / this.options.sampleRate;              // 1 / 44100 = 0,00002267573696 s
         this.frameTime = 1 / 60;                                    // 1/ 60 = 0,01666666667
-        this.sweepMinTime = 1 / 20;                                 // ms per drawn sample (?)
+        this.sweepMinTime = 1 / 15;                                 // ms per drawing (?)
+        this.triggerValue = 0;
+        this.samplesPerSweep = 2 * this.sampleTime / this.sweepMinTime;
         this.lastDraw = 0;
 
         this.samplesX = [];
         this.samplesY = [];
+        this.waves = [];
 
         this.sweepPosition = -1;
         this.belowTrigger = false;
@@ -46,60 +49,78 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
             }
         }
 
+        // now analyze
         if (input[0]) {
-
-            // now analyze
             const xSamplesRaw = input[0];
             const ySamplesRaw = input[1];
 
             // this.postMessage({xSamples: xSamplesRaw, ySamples: ySamplesRaw, mainGain: this.options.mainGain});
             // return true;
 
-
             const length = xSamplesRaw.length;
 
             const xSamples = new Float32Array(length);
             const ySamples = new Float32Array(length);
+
+            let newWaveIndex = -1;
+            let oldSweepPos = this.sweepPosition;
 
             for (let i = 0; i < length; i++) {
                 xSamples[i] = xSamplesRaw[i];
                 ySamples[i] = ySamplesRaw[i];
             }
 
-            const triggerValue = 0;
-            const samplesPerSweep = 2 * this.sampleTime / this.sweepMinTime;
-
             for (let i = 0; i < length; i++) {
-                this.sweepPosition += samplesPerSweep;
-                if (this.sweepPosition > 1.1 && this.belowTrigger && ySamples[i] >= triggerValue) {
+                this.sweepPosition += this.samplesPerSweep;
+                if (this.sweepPosition > 1.1 && this.belowTrigger && ySamples[i] >= this.triggerValue) {
                     if (i === 0) {
                         //don't bother to calculate
                         this.sweepPosition = -1;
-                    } else {
-                        const delta = (ySamples[i] - triggerValue) / (ySamples[i] - ySamples[i - 1]);
-                        this.sweepPosition = -1 + delta * samplesPerSweep;
+                    }
+                    else {
+                        const delta = (ySamples[i] - this.triggerValue) / (ySamples[i] - ySamples[i - 1]);
+                        this.sweepPosition = -1 + delta * this.samplesPerSweep;
                     }
                 }
                 xSamples[i] = this.sweepPosition;
-                this.belowTrigger = ySamples[i] < triggerValue;
+                this.belowTrigger = ySamples[i] < this.triggerValue;
+
+                //console.log(`sweepPosition ${this.sweepPosition}`)
+                if (this.sweepPosition < 0 && oldSweepPos > 0) {
+                    newWaveIndex = i;
+                }
+                oldSweepPos = this.sweepPosition;
             }
 
             //this.postMessage({xSamples, ySamples});
 
-            this.samplesX.push(...xSamples);
-            this.samplesY.push(...ySamples);
+            if (newWaveIndex > -1) {
+                const waveSamplesX = [...this.samplesX.splice(0), ...xSamples.slice(0, newWaveIndex)];
+                const waveSamplesY = [...this.samplesY.splice(0), ...ySamples.slice(0, newWaveIndex)];
+                this.waves.push({xSamples: waveSamplesX, ySamples: waveSamplesY});
+
+                this.samplesX.push(...xSamples.slice(newWaveIndex));
+                this.samplesY.push(...ySamples.slice(newWaveIndex));
+            }
+            else {
+                this.samplesX.push(...xSamples);
+                this.samplesY.push(...ySamples);
+            }
         }
 
         const now = new Date().getTime();
         const timeElapsed = now - this.lastDraw;
 
         if (timeElapsed >= this.frameTime) {
-            this.postMessage({xSamples: this.samplesX, ySamples: this.samplesY});
-            this.samplesX = [];
-            this.samplesY = [];
+            //this.postMessage({xSamples: this.samplesX, ySamples: this.samplesY});
+            // this.samplesX = [];
+            // this.samplesY = [];
+            this.postMessage(this.waves);
+            this.waves = [];
+
             this.lastDraw = now;
-            console.timeEnd('sample');
-            console.time('sample')
+            // console.timeEnd('sample');
+            // console.time('sample')
         }
 
 

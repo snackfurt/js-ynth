@@ -16,7 +16,7 @@ export default class OscilloscopeRenderer {
      */
     draw(data) {
         //return;
-        //console.log('draw', Object.keys(data));
+        console.log('draw', data);
         /*
         const { xSamples, ySamples, mainGain } = data;
         if (xSamples && ySamples) {
@@ -24,8 +24,9 @@ export default class OscilloscopeRenderer {
         }
         */
 
-        const { xSamples, ySamples } = data;
-        if (xSamples && xSamples.length) {
+        // const { xSamples, ySamples } = data;
+        // if (xSamples && xSamples.length) {
+        if (data.length) {
             /*
             if (this.rafId) cancelAnimationFrame(this.rafId);
             this.rafId = requestAnimationFrame(() => {
@@ -33,12 +34,12 @@ export default class OscilloscopeRenderer {
                 this.drawSample(data);
             })
             */
-            this.drawSample(data);
+            this.drawSample(data[0]);
         }
     }
 
     drawSample(data) {
-        console.log(data)
+        //console.log(data)
         const { xSamples, ySamples } = data;
         const { width, height } = this.canvas;
         const { x: startX, y: startY } = this.getWavePointCoordsAtIndex(data, 0, width, height);

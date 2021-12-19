@@ -1,11 +1,11 @@
-<div class='canvasContainer center' bind:this={canvasContainer}>
+<div class="canvasContainer center" bind:this={canvasContainer}>
     {#if !supportsWebGl}
         Sorry, your browser does not support WebGl
     {:else if renderingError}
         Sorry, there was an error:
         {renderingError}
     {:else}
-        <canvas id="example" class='canvas' bind:this={canvas}></canvas>
+        <canvas id="example" class="canvas" bind:this={canvas}></canvas>
     {/if}
 </div>
 
