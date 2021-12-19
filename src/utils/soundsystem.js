@@ -56,13 +56,9 @@ function removeSound(sound) {
     }
 }
 
-function getProcessor() {
-    return processor;
-}
 
 export {
     init,
     createSound,
     removeSound,
-    getProcessor,
 }

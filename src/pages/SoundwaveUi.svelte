@@ -1,6 +1,6 @@
 <ViewControls bind:sampleSize={sampleSize} bind:oldWavesDisplayed={oldWavesDisplayed} />
 <!--<WaveformCanvas {doDrawing} {sampleSize} {oldWavesDisplayed} />-->
-<Oscilloscope bind:this={oscilloscope}/>
+<Oscilloscope bind:this={oscilloscope} {oldWavesDisplayed} />
 <button on:mousedown={startSound} on:mouseup={stopSound}>
     make a sound
 </button>
@@ -14,7 +14,6 @@
 <script>
     import {onMount} from 'svelte';
     import SoundwaveControls from '../modules/SoundwaveControls.svelte';
-    import WaveformCanvas from '../modules/WaveformCanvas.svelte';
     import ViewControls from '../modules/ViewControls.svelte';
     import Sound from '../utils/Sound';
     import Oscilloscope, { drawCallback } from '../modules/Oscilloscope.svelte';
