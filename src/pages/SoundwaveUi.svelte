@@ -1,6 +1,5 @@
 <ViewControls bind:sampleSize={sampleSize} bind:oldWavesDisplayed={oldWavesDisplayed} />
-<!--<WaveformCanvas {doDrawing} {sampleSize} {oldWavesDisplayed} />-->
-<Oscilloscope bind:this={oscilloscope} {oldWavesDisplayed} />
+<Oscilloscope bind:this={oscilloscope} {doDrawing} {oldWavesDisplayed} />
 <button on:mousedown={startSound} on:mouseup={stopSound}>
     make a sound
 </button>

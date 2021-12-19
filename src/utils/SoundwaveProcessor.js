@@ -6,7 +6,7 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
         this.options = options.processorOptions;
         //console.log('SoundwaveProcessor', this.options)
 
-        this.port.onmessage = this.onMessage;
+        this.port.onmessage = this.onMessage.bind(this);
 
         this.sampleTime = 1 / this.options.sampleRate;              // 1 / 44100 = 0,00002267573696 s
         this.frameTime = 1 / 60;                                    // 1/ 60 = 0,01666666667
@@ -14,6 +14,10 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
         this.triggerValue = 0;
         this.samplesPerSweep = 2 * this.sampleTime / this.sweepMinTime;
         this.lastDraw = 0;
+
+        this.oneWave = 1 / 80;      // 0,0125
+        this.samplesPerWave = this.oneWave / this.sampleTime; // 551,25
+
 
         this.samplesX = [];
         this.samplesY = [];
@@ -25,6 +29,20 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
 
     onMessage(event) {
         console.log('AudioWorkletProcessor.onMessage:', event.data);
+
+        switch(event.data) {
+            case 'getWaves': {
+                this.postMessage({
+                    id: 'waveData',
+                    data: this.getWavedata()
+                })
+                break;
+            }
+            default: {
+                console.log('SoundwaveProcessor: unknown message');
+                break;
+            }
+        }
     }
 
     postMessage(data) {
@@ -75,7 +93,7 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
 
             for (let i = 0; i < length; i++) {
                 this.sweepPosition += this.samplesPerSweep;
-                if (this.sweepPosition > 1.1 && this.belowTrigger && ySamples[i] >= this.triggerValue) {
+                if (this.sweepPosition > 1.0 && this.belowTrigger && ySamples[i] >= this.triggerValue) {
                     if (i === 0) {
                         //don't bother to calculate
                         this.sweepPosition = -1;
@@ -111,6 +129,7 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
             }
         }
 
+        /*
         const now = new Date().getTime();
         const timeElapsed = now - this.lastDraw;
 
@@ -125,9 +144,13 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
             // console.timeEnd('sample');
             // console.time('sample')
         }
-
+        */
 
         return true;
+    }
+
+    getWavedata() {
+        return this.waves.splice(0);
     }
 }
 
