@@ -86,9 +86,19 @@ async function startSoundProcessor() {
 function stopSoundProcessor() {
     console.log('stopSoundProcessor')
     if (processor) {
-        processor.port.postMessage('stop');
+        processorMessage('stop');
         limiter.disconnect(processor);
         processor.disconnect(Pizzicato.masterGainNode);
+    }
+}
+
+function setProcessorSweepTime(time) {
+    processorMessage('sweepTime', time);
+}
+
+function processorMessage(id, data) {
+    if (processor) {
+        processor.port.postMessage({id, data});
     }
 }
 
@@ -98,4 +108,5 @@ export {
     removeSound,
     startSoundProcessor,
     stopSoundProcessor,
+    setProcessorSweepTime,
 }

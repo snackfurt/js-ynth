@@ -21,8 +21,7 @@
     initSoundWave();
 
     function initSoundWave() {
-        const { soundwave } = sound;
-        const isPlaying = soundwave ? soundwave.playing : false;
+        const { soundwave, isPlaying } = sound;
         removeSound(soundwave);
 
         sound.soundwave = createSound(waveType, frequency);

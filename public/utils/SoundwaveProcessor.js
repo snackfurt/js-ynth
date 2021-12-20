@@ -11,8 +11,6 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
         this.sampleTime = 1 / this.options.sampleRate;              // 1 / 44100 = 0,00002267573696 s
         this.frameTime = 1 / 60 * 1000;                             // 16,66666667 ms
         this.sweepMinTime = 1 / 15;                                 // ms per drawing (?)
-        this.triggerValue = 0;
-        this.samplesPerSweep = 2 * this.sampleTime / this.sweepMinTime;
         this.lastDraw = 0;
 
         this.oneWave = 1 / 80;      // 0,0125
@@ -22,22 +20,31 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
 
         this.samplesX = [];
         this.samplesY = [];
-        this.waves = [];
 
         this.sweepPosition = -1;
-        this.belowTrigger = false;
+        this.setSamplesPerSweep();
+    }
+
+    setSamplesPerSweep() {
+        this.samplesPerSweep = 2 * this.sampleTime / this.sweepMinTime;
+        console.log('samplesPerSweep:', this.samplesPerSweep, 'sweepMinTime:', this.sweepMinTime);
     }
 
     onMessage(event) {
         //console.log('AudioWorkletProcessor.onMessage:', event.data);
-
-        switch(event.data) {
+        const { id, data } = event.data;
+        switch(id) {
             case 'start': {
                 this.continueProcessing = true;
                 break;
             }
             case 'stop': {
                 this.continueProcessing = false;
+                break;
+            }
+            case 'sweepTime': {
+                this.sweepMinTime = data;
+                this.setSamplesPerSweep();
                 break;
             }
             default: {
@@ -54,7 +61,7 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
 
     process(inputs, outputs, parameters)
     {
-        console.log('process')
+        //console.log('process')
         const input = inputs[0];
         const output = outputs[0];
 
@@ -93,18 +100,10 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
 
             for (let i = 0; i < length; i++) {
                 this.sweepPosition += this.samplesPerSweep;
-                if (this.sweepPosition > 1.0 /*&& this.belowTrigger && ySamples[i] >= this.triggerValue*/) {
-                    if (i === 0) {
-                        //don't bother to calculate
-                        this.sweepPosition = -1;
-                    }
-                    else {
-                        const delta = (ySamples[i] - this.triggerValue) / (ySamples[i] - ySamples[i - 1]);
-                        this.sweepPosition = -1 + delta * this.samplesPerSweep;
-                    }
+                if (this.sweepPosition > 1.0) {
+                    this.sweepPosition = -1;
                 }
                 xSamples[i] = this.sweepPosition;
-                this.belowTrigger = ySamples[i] < this.triggerValue;
             }
 
             this.samplesX.push(...xSamples);

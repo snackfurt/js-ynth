@@ -20,7 +20,12 @@
     import ViewControls from '../modules/ViewControls.svelte';
     import Sound from '../utils/Sound';
     import Oscilloscope, { drawCallback } from '../modules/Oscilloscope.svelte';
-    import { init as initSoundsystem, startSoundProcessor, stopSoundProcessor } from '../utils/soundsystem';
+    import {
+        init as initSoundsystem,
+        setProcessorSweepTime,
+        startSoundProcessor,
+        stopSoundProcessor
+    } from '../utils/soundsystem';
 
     let isSoundPlaying = false;
     let sampleSize;
@@ -34,6 +39,7 @@
         sounds = sounds.concat(new Sound());
     });
 
+    // reactive stuff
     $: {
         if (isSoundPlaying) {
             startSound();
@@ -43,8 +49,14 @@
         }
     }
 
+    $: {
+        setProcessorSweepTime(sampleSize);
+    }
+    //
+
     function startSound() {
         startSoundProcessor().then(() => {
+            setProcessorSweepTime(sampleSize);
             sounds.forEach(sound => sound.play());
         });
     }
@@ -63,7 +75,11 @@
     }
 
     function addSound() {
-        sounds = sounds.concat(new Sound());
+        const sound = new Sound();
+        if (isSoundPlaying) {
+            sound.play();
+        }
+        sounds = sounds.concat(sound);
     }
 
     function removeSound(sound) {

@@ -48,7 +48,7 @@
     }
 
     function draw(data) {
-        console.log('draw');
+        //console.log('draw');
 
         // stop fade out
         if (fadeOutTimeout) {

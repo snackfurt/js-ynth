@@ -7,12 +7,14 @@ export default class Sound {
     }
 
     play() {
+        this.isPlaying = true;
         if (this.soundwave) {
             this.soundwave.play();
         }
     }
 
     stop() {
+        this.isPlaying = false;
         if (this.soundwave) {
             this.soundwave.stop();
         }
