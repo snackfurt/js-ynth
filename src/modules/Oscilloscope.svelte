@@ -48,7 +48,7 @@
     }
 
     function draw(data) {
-        console.log('draw', data.length);
+        console.log('draw');
 
         // stop fade out
         if (fadeOutTimeout) {
@@ -56,34 +56,19 @@
             fadeOutTimeout = null;
         }
 
-        if (data.length) {
-            /*
-            if (this.rafId) cancelAnimationFrame(this.rafId);
-            this.rafId = requestAnimationFrame(() => {
-                this.rafId = null;
-                this.drawSample(data);
-            })
-            */
-            // TODO: loop through waves?
-            drawSample(data[0]);
-        }
-    }
-
-    function drawSample(data) {
-        //console.log(data)
+        // draw samples
         const { samplesLength, continueProcessing } = data;
         const { width, height } = offscreenCanvas;
-        const { x: startX, y: startY } = getWavePointCoordsAtIndex(data, 0, width, height);
+        let lastX = Number.POSITIVE_INFINITY;
 
         offscreenDrawingContext.clearRect(0, 0, width, height);
         offscreenDrawingContext.beginPath();
-        offscreenDrawingContext.moveTo(startX, startY);
 
-        for(let i = 1; i < samplesLength; i++) {
-
+        for(let i = 0; i < samplesLength; i++) {
             const { x, y } = getWavePointCoordsAtIndex(data, i, width, height);
-            //console.log({x ,y});
-            offscreenDrawingContext.lineTo(x, y);
+            if (x < lastX) offscreenDrawingContext.moveTo(x, y);
+            else offscreenDrawingContext.lineTo(x, y);
+            lastX = x;
         }
 
         offscreenDrawingContext.stroke();

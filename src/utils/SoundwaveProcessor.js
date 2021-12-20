@@ -86,8 +86,6 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
             const xSamples = new Float32Array(length);
             const ySamples = new Float32Array(length);
 
-            let newWaveIndex = -1;
-
             for (let i = 0; i < length; i++) {
                 xSamples[i] = xSamplesRaw[i];
                 ySamples[i] = ySamplesRaw[i];
@@ -95,7 +93,7 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
 
             for (let i = 0; i < length; i++) {
                 this.sweepPosition += this.samplesPerSweep;
-                if (this.sweepPosition > 1.0 && this.belowTrigger && ySamples[i] >= this.triggerValue) {
+                if (this.sweepPosition > 1.0 /*&& this.belowTrigger && ySamples[i] >= this.triggerValue*/) {
                     if (i === 0) {
                         //don't bother to calculate
                         this.sweepPosition = -1;
@@ -104,48 +102,26 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
                         const delta = (ySamples[i] - this.triggerValue) / (ySamples[i] - ySamples[i - 1]);
                         this.sweepPosition = -1 + delta * this.samplesPerSweep;
                     }
-                    newWaveIndex = i;
                 }
                 xSamples[i] = this.sweepPosition;
                 this.belowTrigger = ySamples[i] < this.triggerValue;
             }
 
-            //this.postMessage({xSamples, ySamples});
-
-            if (newWaveIndex > -1) {
-                const waveSamplesX = [...this.samplesX.splice(0), ...xSamples.slice(0, newWaveIndex)];
-                const waveSamplesY = [...this.samplesY.splice(0), ...ySamples.slice(0, newWaveIndex)];
-                this.waves.push(this.getWaveData(waveSamplesX, waveSamplesY));
-
-                this.samplesX.push(...xSamples.slice(newWaveIndex));
-                this.samplesY.push(...ySamples.slice(newWaveIndex));
-            }
-            else {
-                this.samplesX.push(...xSamples);
-                this.samplesY.push(...ySamples);
-            }
+            this.samplesX.push(...xSamples);
+            this.samplesY.push(...ySamples);
         }
 
-        // only draw "complete" waves in ca. 60 fps
+        // draw in ca. 60 fps or if we stop processing
         const now = new Date().getTime();
         const timeElapsed = now - this.lastDraw;
 
-        if (timeElapsed >= this.frameTime) {
-            //this.postMessage({xSamples: this.samplesX, ySamples: this.samplesY});
-            // this.samplesX = [];
-            // this.samplesY = [];
-            this.postMessage('waveData', this.waves);
-            this.waves = [];
+        if (timeElapsed >= this.frameTime || !this.continueProcessing) {
+            const waveData = this.getWaveData(this.samplesX.splice(0), this.samplesY.splice(0));
+            this.postMessage('waveData', waveData);
 
             this.lastDraw = now;
             // console.timeEnd('sample');
             // console.time('sample')
-        }
-
-        // if we stop processing, draw the last samples
-        if (!this.continueProcessing) {
-            const lastSamplesData = this.getWaveData(this.samplesX.splice(0), this.samplesY.splice(0));
-            this.postMessage('waveData', [lastSamplesData]);
         }
 
         return this.continueProcessing;
