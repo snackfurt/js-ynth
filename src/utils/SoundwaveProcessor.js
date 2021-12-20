@@ -115,7 +115,7 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
             if (newWaveIndex > -1) {
                 const waveSamplesX = [...this.samplesX.splice(0), ...xSamples.slice(0, newWaveIndex)];
                 const waveSamplesY = [...this.samplesY.splice(0), ...ySamples.slice(0, newWaveIndex)];
-                this.waves.push({xSamples: waveSamplesX, ySamples: waveSamplesY, samplesLength: waveSamplesX.length});
+                this.waves.push(this.getWaveData(waveSamplesX, waveSamplesY));
 
                 this.samplesX.push(...xSamples.slice(newWaveIndex));
                 this.samplesY.push(...ySamples.slice(newWaveIndex));
@@ -144,15 +144,20 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
 
         // if we stop processing, draw the last samples
         if (!this.continueProcessing) {
-            const lastSamplesData = {
-                samplesLength: this.samplesX.length,
-                xSamples: this.samplesX.splice(0),
-                ySamples: this.samplesY.splice(0),
-            };
+            const lastSamplesData = this.getWaveData(this.samplesX.splice(0), this.samplesY.splice(0));
             this.postMessage('waveData', [lastSamplesData]);
         }
 
         return this.continueProcessing;
+    }
+
+    getWaveData(xSamples, ySamples) {
+        return {
+            xSamples,
+            ySamples,
+            samplesLength: xSamples.length,
+            continueProcessing: this.continueProcessing,
+        }
     }
 }
 

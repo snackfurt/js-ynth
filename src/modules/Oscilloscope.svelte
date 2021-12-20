@@ -16,6 +16,9 @@
     let offscreenCanvas;
     let offscreenDrawingContext;
 
+    let fadeOutTimeout = null;
+    const frameTime = 1 / 60 * 1000;
+
     onMount(() => {
         init();
     });
@@ -47,6 +50,12 @@
     function draw(data) {
         console.log('draw', data.length);
 
+        // stop fade out
+        if (fadeOutTimeout) {
+            clearTimeout(fadeOutTimeout);
+            fadeOutTimeout = null;
+        }
+
         if (data.length) {
             /*
             if (this.rafId) cancelAnimationFrame(this.rafId);
@@ -55,14 +64,14 @@
                 this.drawSample(data);
             })
             */
-            // TODO: loop through waves
+            // TODO: loop through waves?
             drawSample(data[0]);
         }
     }
 
     function drawSample(data) {
         //console.log(data)
-        const { samplesLength } = data;
+        const { samplesLength, continueProcessing } = data;
         const { width, height } = offscreenCanvas;
         const { x: startX, y: startY } = getWavePointCoordsAtIndex(data, 0, width, height);
 
@@ -80,6 +89,10 @@
         offscreenDrawingContext.stroke();
 
         renderImage();
+
+        if (!continueProcessing) {
+            fadeOutImage();
+        }
     }
 
     function getWavePointCoordsAtIndex(waveData, index, canvasWidth, canvasHeight) {
@@ -120,6 +133,18 @@
             onscreenDrawingContext.drawImage(image, 0, 0, width, height);
         });
         onscreenDrawingContext.globalAlpha = 1;
+    }
+
+    function fadeOutImage() {
+        console.log('fadeOutImage', fadeOutTimeout);
+        if (!fadeOutTimeout && canvasImages.length) {
+            fadeOutTimeout = setTimeout(() => {
+                canvasImages.splice(0, 1);
+                drawImages();
+                fadeOutTimeout = null;
+                fadeOutImage();
+            }, frameTime);
+        }
     }
 
 </script>
