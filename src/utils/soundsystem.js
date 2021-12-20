@@ -2,33 +2,32 @@ import * as Pizzicato from 'pizzicato';
 
 const sounds = [];
 
+let audioContext;
 let limiter;
 let preGain;
 let processor;
 
-let drawCallback;
-let waveDataResolver;
+let waveDataCallback;
+let processorOptions;
 
 async function init(drawCallback) {
+    waveDataCallback = drawCallback;
+
+    audioContext = Pizzicato.context;
     limiter = new Pizzicato.Effects.Compressor();
-    preGain = Pizzicato.context.createGain();
-    processor = await createProcessor(drawCallback);
+    preGain = audioContext.createGain();
 
-    preGain.connect(limiter);
-    limiter.connect(processor);
-    processor.connect(Pizzicato.masterGainNode);
-}
-
-async function createProcessor(drawCallback) {
-    const audioContext = Pizzicato.context;
-    await audioContext.audioWorklet.addModule('utils/SoundwaveProcessor.js');
-    const processorOptions = {
+    processorOptions = {
         mainGain: Pizzicato.masterGainNode.gain.value,
         sampleRate: audioContext.sampleRate,
     }
+    await audioContext.audioWorklet.addModule('utils/SoundwaveProcessor.js');
+}
+
+function createProcessor() {
     const processorNode = new AudioWorkletNode(audioContext, 'soundwave-processor', {processorOptions});
     processorNode.port.onmessage = (e) => {
-        console.log('soundsystem.onmessage', e);
+        //console.log('soundsystem.onmessage', e);
         handleProcessorMessage(e.data);
     }
 
@@ -37,19 +36,15 @@ async function createProcessor(drawCallback) {
 
 function handleProcessorMessage(message) {
     const { id, data } = message;
-    console.log('handleProcessorMessage', id);
+    //console.log('handleProcessorMessage', id);
     //console.log(data);
     switch (id) {
-        case 'draw': {
-            drawCallback(data);
-            break;
-        }
         case 'waveData': {
-            waveDataResolver(data);
+            waveDataCallback(data);
             break;
         }
         default: {
-            console.log('unknow processor message');
+            console.warn('unknown processor message', message);
             break;
         }
     }
@@ -78,16 +73,29 @@ function removeSound(sound) {
     }
 }
 
-function getSoundProcessorData() {
-    return new Promise((resolve, reject) => {
-        waveDataResolver = resolve;
-        processor.port.postMessage('getWaves');
-    });
+async function startSoundProcessor() {
+    console.log('startSoundProcessor')
+
+    processor = createProcessor();
+
+    preGain.connect(limiter);
+    limiter.connect(processor);
+    processor.connect(Pizzicato.masterGainNode);
+}
+
+function stopSoundProcessor() {
+    console.log('stopSoundProcessor')
+    if (processor) {
+        processor.port.postMessage('stop');
+        limiter.disconnect(processor);
+        processor.disconnect(Pizzicato.masterGainNode);
+    }
 }
 
 export {
     init,
     createSound,
     removeSound,
-    getSoundProcessorData,
+    startSoundProcessor,
+    stopSoundProcessor,
 }

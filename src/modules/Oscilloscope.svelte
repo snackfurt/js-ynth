@@ -5,10 +5,8 @@
 
 <script>
     import {onMount} from 'svelte';
-    import {getSoundProcessorData} from '../utils/soundsystem';
 
     export let oldWavesDisplayed;
-    export let doDrawing;
 
     const canvasImages = [];
 
@@ -21,8 +19,6 @@
     onMount(() => {
         init();
     });
-
-    $: doDrawing && drawNextWave();
 
     function init() {
         setCanvasSize(onscreenCanvas);
@@ -48,26 +44,8 @@
         return drawingContext;
     }
 
-    function drawNextWave() {
-        if (doDrawing) {
-            console.log('drawNextWave')
-            getSoundProcessorData()
-                .then(waveData => {
-                    console.log('got wavedata')
-                    requestAnimationFrame(() => {
-                        console.log('raf')
-                        draw(waveData);
-                        drawNextWave();
-                    });
-                })
-                .catch(error => {
-                    console.warn('drawNextWave error:', error);
-                });
-        }
-    }
-
     function draw(data) {
-        console.log('draw', data);
+        console.log('draw', data.length);
 
         if (data.length) {
             /*

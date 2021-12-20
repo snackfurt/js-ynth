@@ -1,7 +1,11 @@
 <ViewControls bind:sampleSize={sampleSize} bind:oldWavesDisplayed={oldWavesDisplayed} />
-<Oscilloscope bind:this={oscilloscope} {doDrawing} {oldWavesDisplayed} />
-<button on:mousedown={startSound} on:mouseup={stopSound}>
-    make a sound
+<Oscilloscope bind:this={oscilloscope} {oldWavesDisplayed} />
+<button on:click={() => isSoundPlaying = !isSoundPlaying}>
+    {#if isSoundPlaying}
+        stop sound
+    {:else}
+        play sound
+    {/if}
 </button>
 <button on:click={addSound}>
     add a sound
@@ -16,10 +20,9 @@
     import ViewControls from '../modules/ViewControls.svelte';
     import Sound from '../utils/Sound';
     import Oscilloscope, { drawCallback } from '../modules/Oscilloscope.svelte';
-    import { init as initSoundsystem } from '../utils/soundsystem';
+    import { init as initSoundsystem, startSoundProcessor, stopSoundProcessor } from '../utils/soundsystem';
 
-    let isSoundPlaying = false
-    let doDrawing = false;
+    let isSoundPlaying = false;
     let sampleSize;
     let oldWavesDisplayed;
     let oscilloscope;
@@ -31,10 +34,19 @@
         sounds = sounds.concat(new Sound());
     });
 
+    $: {
+        if (isSoundPlaying) {
+            startSound();
+        }
+        else {
+            stopSound();
+        }
+    }
+
     function startSound() {
-        isSoundPlaying = true;
-        doDrawing = true;
-        sounds.forEach(sound => sound.play());
+        startSoundProcessor().then(() => {
+            sounds.forEach(sound => sound.play());
+        });
     }
 
     function stopSound() {
@@ -44,7 +56,9 @@
         //const timeout = Math.max(soundWave.release * 1000, drawInterval);
         const timeout = 600;
         setTimeout(() => {
-            doDrawing = isSoundPlaying;
+            if (!isSoundPlaying) {
+                stopSoundProcessor();
+            }
         }, timeout);
     }
 

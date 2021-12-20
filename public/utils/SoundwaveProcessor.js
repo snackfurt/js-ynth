@@ -9,11 +9,16 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
         this.port.onmessage = this.onMessage.bind(this);
 
         this.sampleTime = 1 / this.options.sampleRate;              // 1 / 44100 = 0,00002267573696 s
-        this.frameTime = 1 / 60;                                    // 1/ 60 = 0,01666666667
+        this.frameTime = 1 / 60 * 1000;                             // 16,66666667 ms
         this.sweepMinTime = 1 / 15;                                 // ms per drawing (?)
         this.triggerValue = 0;
         this.samplesPerSweep = 2 * this.sampleTime / this.sweepMinTime;
         this.lastDraw = 0;
+
+        this.oneWave = 1 / 80;      // 0,0125
+        this.samplesPerWave = this.oneWave / this.sampleTime; // 551,25
+
+        this.continueProcessing = true;
 
         this.samplesX = [];
         this.samplesY = [];
@@ -24,30 +29,32 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
     }
 
     onMessage(event) {
-        console.log('AudioWorkletProcessor.onMessage:', event.data);
+        //console.log('AudioWorkletProcessor.onMessage:', event.data);
 
         switch(event.data) {
-            case 'getWaves': {
-                this.postMessage({
-                    id: 'waveData',
-                    data: this.getWavedata()
-                })
+            case 'start': {
+                this.continueProcessing = true;
+                break;
+            }
+            case 'stop': {
+                this.continueProcessing = false;
                 break;
             }
             default: {
-                console.log('SoundwaveProcessor: unknown message');
+                console.warn('SoundwaveProcessor: unknown message', event.data);
                 break;
             }
         }
     }
 
-    postMessage(data) {
+    postMessage(id, data) {
         //console.log('AudioWorkletProcessor.postMessage:', data);
-        this.port.postMessage(data);
+        this.port.postMessage({id, data});
     }
 
     process(inputs, outputs, parameters)
     {
+        console.log('process')
         const input = inputs[0];
         const output = outputs[0];
 
@@ -80,7 +87,6 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
             const ySamples = new Float32Array(length);
 
             let newWaveIndex = -1;
-            let oldSweepPos = this.sweepPosition;
 
             for (let i = 0; i < length; i++) {
                 xSamples[i] = xSamplesRaw[i];
@@ -98,15 +104,10 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
                         const delta = (ySamples[i] - this.triggerValue) / (ySamples[i] - ySamples[i - 1]);
                         this.sweepPosition = -1 + delta * this.samplesPerSweep;
                     }
+                    newWaveIndex = i;
                 }
                 xSamples[i] = this.sweepPosition;
                 this.belowTrigger = ySamples[i] < this.triggerValue;
-
-                //console.log(`sweepPosition ${this.sweepPosition}`)
-                if (this.sweepPosition < 0 && oldSweepPos > 0) {
-                    newWaveIndex = i;
-                }
-                oldSweepPos = this.sweepPosition;
             }
 
             //this.postMessage({xSamples, ySamples});
@@ -125,7 +126,7 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
             }
         }
 
-        /*
+        // only draw "complete" waves in ca. 60 fps
         const now = new Date().getTime();
         const timeElapsed = now - this.lastDraw;
 
@@ -133,20 +134,25 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
             //this.postMessage({xSamples: this.samplesX, ySamples: this.samplesY});
             // this.samplesX = [];
             // this.samplesY = [];
-            this.postMessage(this.waves);
+            this.postMessage('waveData', this.waves);
             this.waves = [];
 
             this.lastDraw = now;
             // console.timeEnd('sample');
             // console.time('sample')
         }
-        */
 
-        return true;
-    }
+        // if we stop processing, draw the last samples
+        if (!this.continueProcessing) {
+            const lastSamplesData = {
+                samplesLength: this.samplesX.length,
+                xSamples: this.samplesX.splice(0),
+                ySamples: this.samplesY.splice(0),
+            };
+            this.postMessage('waveData', [lastSamplesData]);
+        }
 
-    getWavedata() {
-        return this.waves.splice(0);
+        return this.continueProcessing;
     }
 }
 
