@@ -96,6 +96,10 @@ function setProcessorSweepTime(time) {
     processorMessage('sweepTime', time);
 }
 
+function setProcessorFps(fps) {
+    processorMessage('fps', fps);
+}
+
 function processorMessage(id, data) {
     if (processor) {
         processor.port.postMessage({id, data});
@@ -109,4 +113,5 @@ export {
     startSoundProcessor,
     stopSoundProcessor,
     setProcessorSweepTime,
+    setProcessorFps,
 }

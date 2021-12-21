@@ -1,4 +1,4 @@
-<ViewControls bind:sampleSize={sampleSize} bind:oldWavesDisplayed={oldWavesDisplayed} />
+<ViewControls bind:sampleSize={sampleSize} bind:oldWavesDisplayed={oldWavesDisplayed} bind:fps={fps} />
 <Oscilloscope bind:this={oscilloscope} {oldWavesDisplayed} />
 <button on:click={() => isSoundPlaying = !isSoundPlaying}>
     {#if isSoundPlaying}
@@ -21,7 +21,7 @@
     import Sound from '../utils/Sound';
     import Oscilloscope, { drawCallback } from '../modules/Oscilloscope.svelte';
     import {
-        init as initSoundsystem,
+        init as initSoundsystem, setProcessorFps,
         setProcessorSweepTime,
         startSoundProcessor,
         stopSoundProcessor
@@ -29,6 +29,7 @@
 
     let isSoundPlaying = false;
     let sampleSize;
+    let fps;
     let oldWavesDisplayed;
     let oscilloscope;
 
@@ -52,11 +53,16 @@
     $: {
         setProcessorSweepTime(sampleSize);
     }
+
+    $: {
+        setProcessorFps(fps);
+    }
     //
 
     function startSound() {
         startSoundProcessor().then(() => {
             setProcessorSweepTime(sampleSize);
+            setProcessorFps(fps);
             sounds.forEach(sound => sound.play());
         });
     }

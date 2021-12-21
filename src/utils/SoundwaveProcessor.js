@@ -27,7 +27,7 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
 
     setSamplesPerSweep() {
         this.samplesPerSweep = 2 * this.sampleTime / this.sweepMinTime;
-        console.log('samplesPerSweep:', this.samplesPerSweep, 'sweepMinTime:', this.sweepMinTime);
+        //console.log('samplesPerSweep:', this.samplesPerSweep, 'sweepMinTime:', this.sweepMinTime);
     }
 
     onMessage(event) {
@@ -45,6 +45,10 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
             case 'sweepTime': {
                 this.sweepMinTime = data;
                 this.setSamplesPerSweep();
+                break;
+            }
+            case 'fps': {
+                this.frameTime = 1 / data * 1000;
                 break;
             }
             default: {
