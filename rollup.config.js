@@ -4,6 +4,8 @@ import resolve from '@rollup/plugin-node-resolve';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
+import * as fs from "fs";
+import * as path from "path";
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -26,6 +28,29 @@ function serve() {
 			process.on('exit', toExit);
 		}
 	};
+}
+
+function copyAndWatch(fileIn, fileOut) {
+	return {
+		name: 'copy-and-watch',
+		async buildStart() {
+			this.addWatchFile(fileIn);
+		},
+		async generateBundle() {
+			const filePath = path.resolve('./public', fileOut);
+			ensureDirectoryExistence(filePath);
+			fs.writeFileSync(filePath, fs.readFileSync(fileIn));
+		}
+	}
+}
+
+function ensureDirectoryExistence(filePath) {
+	const dirname = path.dirname(filePath);
+	if (fs.existsSync(dirname)) {
+		return true;
+	}
+	ensureDirectoryExistence(dirname);
+	fs.mkdirSync(dirname);
 }
 
 export default {
@@ -57,6 +82,8 @@ export default {
 			dedupe: ['svelte']
 		}),
 		commonjs(),
+
+		copyAndWatch('src/utils/SoundwaveProcessor.js', 'utils/SoundwaveProcessor.js'),
 
 		// In dev mode, call `npm run start` once
 		// the bundle has been generated

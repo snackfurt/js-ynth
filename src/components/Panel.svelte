@@ -22,7 +22,7 @@
 <script>
     export let heading;
     export let isOpen;
-    export let removeHandler;
+    export let removeHandler = null;
 </script>
 
 
