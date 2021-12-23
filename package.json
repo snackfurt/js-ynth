@@ -6,14 +6,16 @@
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "start": "sirv public --no-clear",
-    "deploy": "rm -rf ./deploy && deploy-to-git"
+    "deploy-release": "npm run build && npm run deploy-to-github",
+    "deploy-to-github": "rm -rf ./deploy && deploy-to-git",
+    "generate-tag": "npm run build && node ./scripts/generateTag.mjs && npm run deploy-to-github"
   },
   "config": {
     "deployToGit": {
       "repository": "git@github.com:snackfurt/js-ynth.git",
       "branch": "deploy",
       "folder": "deploy",
-      "script": "npm run build && cp -R ./public/ ./deploy",
+      "script": "cp -R ./public/ ./deploy",
       "commit": "auto deploy",
       "user": {
         "email": "deingesichtundmeinarsch@web.de",
