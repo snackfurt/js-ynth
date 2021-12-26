@@ -34,6 +34,13 @@
 		background: #f4f4f4;
 	}
 
+	:global(div) {
+		color: #ff3e00;
+		text-transform: uppercase;
+		font-size: 1em;
+		font-weight: 180;
+	}
+
 	main {
 		text-align: center;
 		margin: 0 auto;
@@ -45,13 +52,6 @@
 		text-transform: uppercase;
 		font-size: 2em;
 		font-weight: 100;
-	}
-
-	div {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 1em;
-		font-weight: 180;
 	}
 
 </style>

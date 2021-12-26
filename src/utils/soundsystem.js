@@ -8,10 +8,12 @@ let preGain;
 let processor;
 
 let waveDataCallback;
+let processErrorCallback;
 let processorOptions;
 
-async function init(drawCallback) {
+async function init(drawCallback, errorCallback) {
     waveDataCallback = drawCallback;
+    processErrorCallback = errorCallback;
 
     audioContext = Pizzicato.context;
     limiter = new Pizzicato.Effects.Compressor();
@@ -41,6 +43,10 @@ function handleProcessorMessage(message) {
     switch (id) {
         case 'waveData': {
             waveDataCallback(data);
+            break;
+        }
+        case 'error': {
+            processErrorCallback(data);
             break;
         }
         default: {

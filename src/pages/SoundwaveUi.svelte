@@ -1,5 +1,9 @@
 <ViewControls bind:sampleSize={sampleSize} bind:oldWavesDisplayed={oldWavesDisplayed} bind:fps={fps} />
-<Oscilloscope bind:this={oscilloscope} {oldWavesDisplayed} />
+{#if errorMessage}
+    <div class="errorMsg">{errorMessage}</div>
+{:else}
+    <Oscilloscope bind:this={oscilloscope} {oldWavesDisplayed} />
+{/if}
 <button on:click={() => isSoundPlaying = !isSoundPlaying}>
     {#if isSoundPlaying}
         stop sound
@@ -32,11 +36,12 @@
     let fps;
     let oldWavesDisplayed;
     let oscilloscope;
+    let errorMessage;
 
     let sounds = [];
 
     onMount(() => {
-        initSoundsystem(drawCallback);
+        initSoundsystem(drawCallback, errorCallback);
         sounds = sounds.concat(new Sound());
     });
 
@@ -97,4 +102,27 @@
             sounds = Object.values(remainingSounds);
         }
     }
+
+    function errorCallback(errorType) {
+        let message = 'an error occurred.';
+
+        switch(errorType) {
+            case 'process': {
+                message = 'cannot get audio data. please check your audio system - is your audio used by another app?'
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+
+        errorMessage = message;
+    }
 </script>
+
+
+<style>
+    .errorMsg {
+        margin: 20px 0;
+    }
+</style>

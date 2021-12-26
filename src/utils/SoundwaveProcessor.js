@@ -87,6 +87,7 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
         }
         if (!input[1]) {
             console.warn('no ySamples - output busy?');
+            this.postMessage('error', 'process');
         }
 
         if (input[0] && input[1]) {

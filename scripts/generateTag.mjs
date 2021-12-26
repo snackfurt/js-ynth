@@ -44,13 +44,23 @@ else {
     // store new version in versions.txt file
     fs.writeFileSync(versionFile, newVersion);
 
-    // tag
-    try {
-        const currentBranch = execSync('git branch --show-current').toString().trim();
-        const tagResult = execSync(`git tag ${newVersion}`).toString().trim();
-        const pushResult = execSync(`git push origin ${currentBranch}`).toString().trim();
+    // update versions/index.html
+    const versionsIndexFile = path.resolve(versionsPath, 'index.html');
+    const versionsIndexContent = fs.readFileSync(versionsIndexFile).toString();
+    const searchString = `<div id="end"></div>`;
+    const replaceString = `<a href="./${newVersion}">${newVersion}</a>
+    <div id="end"></div>`;
+    const newIndexContent = versionsIndexContent.replace(searchString, replaceString);
+    fs.writeFileSync(versionsIndexFile, newIndexContent);
 
-        console.log('tag data:', {currentBranch, tagResult, pushResult});
+    // commit + tag
+    try {
+        //const currentBranch = execSync('git branch --show-current').toString().trim();
+        const commitResult = execSync(`git commit -m "generateTag ${newVersion}"`).toString().trim();
+        const tagResult = execSync(`git tag ${newVersion}`).toString().trim();
+        //const pushResult = execSync(`git push origin ${currentBranch}`).toString().trim();
+
+        console.log('tag data:', {tagResult, commitResult});
     }
     catch(e) {
         console.log('Error while tagging:', e);
