@@ -4,67 +4,61 @@ import { tmpdir } from 'os';
 import { execSync } from 'child_process';
 
 const versionFile = path.resolve('./version.txt');
-const versionFileContent = fs.readFileSync(versionFile).toString();
-const versionParts = versionFileContent.split('.');
-const newMinorVersion = parseInt(versionParts[1], 10) + 1;
+const version = fs.readFileSync(versionFile).toString();
 
-if (isNaN(newMinorVersion)) {
-    console.error('Error setting new version!', {versionFileContent});
+// copy public folder except "versions" subdir
+const publicDirPath = path.resolve('./public');
+const versionsPath = path.resolve(publicDirPath, 'versions');
+
+console.log(`creating version ${version}`);
+
+// create dir for new version, delete dir if it already exists
+const newVersionDirPath = path.resolve(`./public/versions/${version}`);
+if (fs.existsSync(newVersionDirPath)) {
+    fs.rmdirSync(newVersionDirPath, { recursive: true, force: true });
 }
-else {
-    // copy public folder except "versions" subdir
-    const publicDirPath = path.resolve('./public');
-    const versionsPath = path.resolve(publicDirPath, 'versions');
-    const newVersion = `${versionParts[0]}.${newMinorVersion}`;
+fs.mkdirSync(newVersionDirPath);
+console.log('✔ create version directory');
 
-    console.log(`creating version ${newVersion}`);
+// create temp dir, because we cannot copy directly from "public" into a subfolder of "public"
+const tempDir = fs.mkdtempSync(`${tmpdir()}${path.sep}`);
 
-    // create dir for new version, delete dir if it already exists
-    const newVersionDirPath = path.resolve(`./public/versions/${newVersion}`);
-    if (fs.existsSync(newVersionDirPath)) {
-        fs.rmdirSync(newVersionDirPath, { recursive: true, force: true });
+// now copy
+fs.cpSync(publicDirPath, tempDir, {
+    recursive: true,
+    filter: (source, destination) => {
+        //console.log('filter:', {source, destination});
+        return source !== versionsPath;
     }
-    fs.mkdirSync(newVersionDirPath);
+});
+fs.cpSync(tempDir, newVersionDirPath, {
+    recursive: true
+});
+console.log('✔ copy public folder');
 
-    // create temp dir, because we cannot copy directly from "public" into a subfolder of "public"
-    const tempDir = fs.mkdtempSync(`${tmpdir()}${path.sep}`);
+// update versions/index.html
+const versionsIndexFile = path.resolve(versionsPath, 'index.html');
+const versionsIndexContent = fs.readFileSync(versionsIndexFile).toString();
+const searchString = `<div id="end"></div>`;
+const replaceString = `<a href="./${version}">${version} (${new Date().toISOString().substring(0, 19)})</a>
+<div id="end"></div>`;
+const newIndexContent = versionsIndexContent.replace(searchString, replaceString);
+fs.writeFileSync(versionsIndexFile, newIndexContent);
+console.log('✔ update versions/index.html');
 
-    // now copy
-    fs.cpSync(publicDirPath, tempDir, {
-        recursive: true,
-        filter: (source, destination) => {
-            //console.log('filter:', {source, destination});
-            return source !== versionsPath;
-        }
-    });
-    fs.cpSync(tempDir, newVersionDirPath, {
-        recursive: true
-    });
+// commit + tag
+try {
+    //const currentBranch = execSync('git branch --show-current').toString().trim();
+    const pullResult = execSync(`git pull`).toString().trim();
+    const addResult = execSync(`git add ${newVersionDirPath}`).toString().trim();
+    const commitResult = execSync(`git commit -m "generateTag ${version}"`).toString().trim();
+    const tagResult = execSync(`git tag ${version}`).toString().trim();
+    //const pushResult = execSync(`git push origin ${currentBranch}`).toString().trim();
 
-    // store new version in versions.txt file
-    fs.writeFileSync(versionFile, newVersion);
-
-    // update versions/index.html
-    const versionsIndexFile = path.resolve(versionsPath, 'index.html');
-    const versionsIndexContent = fs.readFileSync(versionsIndexFile).toString();
-    const searchString = `<div id="end"></div>`;
-    const replaceString = `<a href="./${newVersion}">${newVersion} (${new Date().toISOString().substring(0, 19)})</a>
-    <div id="end"></div>`;
-    const newIndexContent = versionsIndexContent.replace(searchString, replaceString);
-    fs.writeFileSync(versionsIndexFile, newIndexContent);
-
-    // commit + tag
-    try {
-        //const currentBranch = execSync('git branch --show-current').toString().trim();
-        const pullResult = execSync(`git pull`).toString().trim();
-        const addResult = execSync(`git add ${newVersionDirPath}`).toString().trim();
-        const commitResult = execSync(`git commit -m "generateTag ${newVersion}"`).toString().trim();
-        const tagResult = execSync(`git tag ${newVersion}`).toString().trim();
-        //const pushResult = execSync(`git push origin ${currentBranch}`).toString().trim();
-
-        console.log('tag data:', {pullResult, addResult, commitResult, tagResult});
-    }
-    catch(e) {
-        console.log('Error while tagging:', e);
-    }
+    //console.log('tag data:', {pullResult, addResult, commitResult, tagResult});
+    console.log('✔ create git tag');
+}
+catch(e) {
+    console.log('✘ create git tag');
+    console.log(e);
 }

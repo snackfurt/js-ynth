@@ -1,6 +1,6 @@
 {
   "name": "js-ynth",
-  "version": "1.0.0",
+  "version": "1.1",
   "private": true,
   "scripts": {
     "build": "rollup -c",
@@ -8,7 +8,7 @@
     "start": "sirv public --no-clear",
     "deploy-release": "npm run build && npm run deploy-to-github",
     "deploy-to-github": "rm -rf ./deploy && deploy-to-git",
-    "generate-tag": "npm run build && node ./scripts/generateTag.mjs && npm run deploy-to-github"
+    "generate-tag": "node ./scripts/updateVersion.mjs && npm run build && node ./scripts/generateTag.mjs && npm run deploy-to-github"
   },
   "config": {
     "deployToGit": {

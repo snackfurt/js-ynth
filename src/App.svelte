@@ -1,5 +1,6 @@
 <main>
 	<h1>JS SYNTH</h1>
+	<small>v. {version} · <a href="./versions/">ARCHIVE</a></small>
 	{#if userClicked}
 		<SoundwaveUi></SoundwaveUi>
 	{:else}
@@ -12,6 +13,8 @@
 
 <script>
 	import SoundwaveUi from './pages/SoundwaveUi.svelte';
+
+	export let version;
 
 	let userClicked = false;
 
@@ -34,24 +37,31 @@
 		background: #f4f4f4;
 	}
 
-	:global(div) {
+	main {
+		text-align: center;
+		margin: 0 auto;
+		user-select: none;
 		color: #ff3e00;
 		text-transform: uppercase;
 		font-size: 1em;
 		font-weight: 180;
 	}
 
-	main {
-		text-align: center;
-		margin: 0 auto;
-		user-select: none;
-	}
-
 	h1 {
+		display: inline;
 		color: #ff3e00;
 		text-transform: uppercase;
 		font-size: 2em;
 		font-weight: 100;
+	}
+
+	small {
+		display: block;
+		margin-bottom: 12px;
+	}
+
+	a {
+
 	}
 
 </style>
