@@ -48,7 +48,7 @@ else {
     const versionsIndexFile = path.resolve(versionsPath, 'index.html');
     const versionsIndexContent = fs.readFileSync(versionsIndexFile).toString();
     const searchString = `<div id="end"></div>`;
-    const replaceString = `<a href="./${newVersion}">${newVersion}</a>
+    const replaceString = `<a href="./${newVersion}">${newVersion} (${new Date().toISOString().substring(0, 19)})</a>
     <div id="end"></div>`;
     const newIndexContent = versionsIndexContent.replace(searchString, replaceString);
     fs.writeFileSync(versionsIndexFile, newIndexContent);
@@ -56,11 +56,13 @@ else {
     // commit + tag
     try {
         //const currentBranch = execSync('git branch --show-current').toString().trim();
+        const pullResult = execSync(`git pull`).toString().trim();
+        const addResult = execSync(`git add ${newVersionDirPath}`).toString().trim();
         const commitResult = execSync(`git commit -m "generateTag ${newVersion}"`).toString().trim();
         const tagResult = execSync(`git tag ${newVersion}`).toString().trim();
         //const pushResult = execSync(`git push origin ${currentBranch}`).toString().trim();
 
-        console.log('tag data:', {tagResult, commitResult});
+        console.log('tag data:', {pullResult, addResult, commitResult, tagResult});
     }
     catch(e) {
         console.log('Error while tagging:', e);
