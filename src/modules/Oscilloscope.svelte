@@ -4,7 +4,7 @@
 
 
 <script>
-    import {onMount} from 'svelte';
+    import {onMount, onDestroy} from 'svelte';
 
     export let oldWavesDisplayed;
 
@@ -21,6 +21,10 @@
 
     onMount(() => {
         init();
+    });
+
+    onDestroy(() => {
+        clearFadeOut();
     });
 
     function init() {
@@ -47,14 +51,18 @@
         return drawingContext;
     }
 
-    function draw(data) {
-        //console.log('draw');
-
-        // stop fade out
+    function clearFadeOut() {
         if (fadeOutTimeout) {
             clearTimeout(fadeOutTimeout);
             fadeOutTimeout = null;
         }
+    }
+
+    function draw(data) {
+        //console.log('draw');
+
+        // stop fade out
+        clearFadeOut();
 
         // draw samples
         const { samplesLength, continueProcessing } = data;

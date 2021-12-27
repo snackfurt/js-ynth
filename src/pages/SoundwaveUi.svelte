@@ -4,7 +4,7 @@
 {:else}
     <Oscilloscope bind:this={oscilloscope} {oldWavesDisplayed} />
 {/if}
-<button on:click={() => isSoundPlaying = !isSoundPlaying}>
+<button on:click={toggleSound}>
     {#if isSoundPlaying}
         stop sound
     {:else}
@@ -63,6 +63,11 @@
         setProcessorFps(fps);
     }
     //
+
+    function toggleSound() {
+        errorMessage = null;
+        isSoundPlaying = !isSoundPlaying;
+    }
 
     function startSound() {
         startSoundProcessor().then(() => {
