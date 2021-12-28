@@ -44,7 +44,7 @@
 		color: #ff3e00;
 		text-transform: uppercase;
 		font-size: 1em;
-		font-weight: 180;
+		font-weight: 360;
 	}
 
 	h1 {
@@ -52,7 +52,7 @@
 		color: #ff3e00;
 		text-transform: uppercase;
 		font-size: 2em;
-		font-weight: 100;
+		font-weight: 300;
 	}
 
 	small {

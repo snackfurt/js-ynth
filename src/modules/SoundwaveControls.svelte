@@ -1,62 +1,90 @@
 <Panel heading="SOUNDWAVE" isOpen={true} removeHandler={() => removeHandler(sound)}>
-    <Knob bind:value={waveTypeStep} title="WAVE TYPE" outputValue={waveType} max={4} min={1} pixelRange={200}/>
-    <Knob bind:value={frequency} title="FREQUENCY" unit="Hz" max={5000} min={60} pixelRange={200}/>
+    <Oscillator maxFrequency={5000} minFrequency={60} frequency={80} updateHandler={updateSound} />
+
+    <Toggle bind:toggled={lfoActive}
+            hideLabel label="toggle LFO"
+            switchColor="#ff3e00"
+            toggledColor="#fff"
+            untoggledColor="#fff"
+            on="LFO on"
+            off="LFO off"
+    />
+
+    <Oscillator disabled={!lfoActive} maxFrequency={200} minFrequency={1} frequency={10} updateHandler={updateLfo} />
+
 </Panel>
 
 
 <script>
     import Panel from '../components/Panel.svelte';
-    import Knob from '../components/Knob.svelte';
-    import {createSound, removeSound} from '../utils/soundsystem';
+    import Oscillator from './Oscillator.svelte';
+    import Toggle from '../components/Toggle.svelte';
 
     export let sound;
     export let removeHandler;
 
-    let frequency = 80;
-    let waveTypeStep = 1;
-    let waveType;
+    // sound
+    let soundFrequency;
+    let soundWaveType;
 
-    const WAVE_TYPES = ['sine', 'triangle', 'sawtooth', 'square'];
+    // lfo
+    let lfoActive = false;
+    let lfoFrequency;
+    let lfoWaveType;
 
-    initSoundWave();
+    // reactive stuff
+    $: {
+        if (lfoActive) {
+            sound.initLfo(lfoWaveType, lfoFrequency);
+        }
+        else {
+            sound.removeLfo();
+        }
+    }
+    //
 
     function initSoundWave() {
-        const { soundwave, isPlaying } = sound;
-        removeSound(soundwave);
+        const { isPlaying } = sound;
 
-        sound.soundwave = createSound(waveType, frequency);
-
-        /*
-        soundWave.on('play', () => {
-            isSoundPlaying = true;
-            doDrawing = true;
-        });
-
-        soundWave.on('stop', () => {
-            isSoundPlaying = false;
-            //TODO: find a timeout without magic number - it seems to be not the sound's release
-            //const timeout = Math.max(soundWave.release * 1000, drawInterval);
-            const timeout = 600;
-            setTimeout(() => {
-                doDrawing = isSoundPlaying;
-            }, timeout);
-        });
-        */
+        sound.init(soundWaveType, soundFrequency);
 
         if (isPlaying) {
-            sound.soundwave.play();
+            sound.play();
         }
     }
 
-    $: sound.soundwave.frequency = frequency;
-    $: {
-        waveType = WAVE_TYPES[waveTypeStep-1];
-        initSoundWave();
+    function updateSound(updateData) {
+        //console.log({updateData});
+
+        const { frequency, waveType } = updateData;
+        if (frequency) {
+            soundFrequency = frequency;
+            sound.setFrequency(frequency);
+        }
+        if (waveType) {
+            soundWaveType = waveType;
+            initSoundWave();
+        }
     }
+
+    function updateLfo(updateData) {
+        const { frequency, waveType } = updateData;
+        if (frequency) {
+            lfoFrequency = frequency;
+            sound.setLfoFrequency(frequency);
+        }
+        if (waveType) {
+            lfoWaveType = waveType;
+            sound.initLfo(lfoWaveType, lfoFrequency);
+        }
+    }
+
 
 </script>
 
 
 <style>
-
+    #toggle {
+        width: 112px;
+    }
 </style>

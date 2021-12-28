@@ -57,7 +57,14 @@ function handleProcessorMessage(message) {
 }
 
 function createSound(type, frequency) {
-    const sound = new Pizzicato.Sound({
+    const sound = createOscillator(type, frequency);
+    sound.masterVolume.connect(preGain);
+
+    return sound;
+}
+
+function createOscillator(type, frequency) {
+    const osc = new Pizzicato.Sound({
         source: 'wave',
         options: {
             type,
@@ -66,16 +73,14 @@ function createSound(type, frequency) {
         }
     });
 
-    sound.masterVolume.connect(preGain);
-
-    return sound;
+    return osc;
 }
 
-function removeSound(sound) {
-    if (sound) {
-        sound.off();
-        sound.stop();
-        sound.disconnect();
+function removeOscillator(osc) {
+    if (osc) {
+        osc.off();
+        osc.stop();
+        osc.disconnect();
     }
 }
 
@@ -112,12 +117,18 @@ function processorMessage(id, data) {
     }
 }
 
+function getAudioContext() {
+    return audioContext;
+}
+
 export {
     init,
+    createOscillator,
     createSound,
-    removeSound,
+    removeOscillator,
     startSoundProcessor,
     stopSoundProcessor,
     setProcessorSweepTime,
     setProcessorFps,
+    getAudioContext,
 }
