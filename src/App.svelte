@@ -1,6 +1,6 @@
 <main>
 	<h1>JS SYNTH</h1>
-	<small>v. {version} · <a href="/versions/">ARCHIVE</a></small>
+	<small>v. {version} · <a href="{linkUrl}">ARCHIVE</a></small>
 	{#if userClicked}
 		<SoundwaveUi></SoundwaveUi>
 	{:else}
@@ -17,6 +17,7 @@
 	export let version;
 
 	let userClicked = false;
+	const linkUrl = location.pathname.includes('/versions/') ? '../' : './versions/';
 
 	window.addEventListener('pointerup', initApp);
 
