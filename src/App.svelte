@@ -1,6 +1,6 @@
 <main>
 	<h1>JS SYNTH</h1>
-	<small>v. {version} · <a href="{linkUrl}">ARCHIVE</a></small>
+	<small>v. {version} · <a href="{linkUrl}" bind:this={archiveLink}>ARCHIVE</a></small>
 	{#if userClicked}
 		<SoundwaveUi></SoundwaveUi>
 	{:else}
@@ -17,13 +17,17 @@
 	export let version;
 
 	let userClicked = false;
+	let archiveLink;
+
 	const linkUrl = location.pathname.includes('/versions/') ? '../' : './versions/';
 
 	window.addEventListener('pointerup', initApp);
 
-	function initApp() {
-		window.removeEventListener('pointerup', initApp);
-		userClicked = true;
+	function initApp(event) {
+		if (event.target !== archiveLink) {
+			window.removeEventListener('pointerup', initApp);
+			userClicked = true;
+		}
 	}
 </script>
 

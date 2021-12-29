@@ -86,7 +86,5 @@
 
 
 <style>
-    #toggle {
-        width: 112px;
-    }
+    
 </style>
