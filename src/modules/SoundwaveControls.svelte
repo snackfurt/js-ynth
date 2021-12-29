@@ -1,16 +1,18 @@
 <Panel heading="SOUNDWAVE" isOpen={true} removeHandler={() => removeHandler(sound)}>
-    <Oscillator maxFrequency={5000} minFrequency={60} frequency={80} updateHandler={updateSound} />
+    <Oscillator maxFrequency={5000} minFrequency={60} frequency={80} updateHandler={updateSound}>
+        SOUND
+    </Oscillator>
 
-    <Toggle bind:toggled={lfoActive}
-            hideLabel label="toggle LFO"
-            switchColor="#ff3e00"
-            toggledColor="#fff"
-            untoggledColor="#fff"
-            on="LFO on"
-            off="LFO off"
-    />
-
-    <Oscillator disabled={!lfoActive} maxFrequency={200} minFrequency={1} frequency={10} updateHandler={updateLfo} />
+    <Oscillator disabled={!lfoActive} maxFrequency={200} minFrequency={1} frequency={10} updateHandler={updateLfo}>
+        <Toggle bind:toggled={lfoActive}
+                hideLabel label="toggle LFO"
+                switchColor="#ff3e00"
+                toggledColor="#fff"
+                untoggledColor="#fff"
+                on="LFO on"
+                off="LFO off"
+        />
+    </Oscillator>
 
 </Panel>
 

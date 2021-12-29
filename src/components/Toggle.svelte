@@ -61,7 +61,7 @@
     $: dispatch("toggle", toggled);
 </script>
 
-<div>
+<div class="container">
     <!-- svelte-ignore a11y-label-has-associated-control -->
     <label for="{id}" class:hideLabel>{label}</label>
     <div>
@@ -105,6 +105,10 @@
         white-space: nowrap;
     }
 
+    .container {
+        margin-left: -3px;
+    }
+
     button {
         position: relative;
         padding: 0 0.25rem;
@@ -115,6 +119,7 @@
         font: inherit;
         color: inherit;
         line-height: inherit;
+        margin-top: -2px;
     }
 
     button:not([disabled]) {
@@ -152,5 +157,6 @@
 
     span {
         margin-left: 0.5rem;
+        margin-bottom: 0.7rem;
     }
 </style>

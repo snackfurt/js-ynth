@@ -1,6 +1,11 @@
-<div class:disabled>
-    <Knob bind:value={waveTypeStep} title="WAVE TYPE" outputValue={waveType} max={4} min={1} pixelRange={200}/>
-    <Knob bind:value={frequency} title="FREQUENCY" unit="Hz" max={maxFrequency} min={minFrequency} pixelRange={200}/>
+<div class="container">
+    <div class="controls" class:disabled>
+        <Knob bind:value={waveTypeStep} title="WAVE TYPE" outputValue={waveType} max={4} min={1} pixelRange={200}/>
+        <Knob bind:value={frequency} title="FREQUENCY" unit="Hz" max={maxFrequency} min={minFrequency} pixelRange={200}/>
+    </div>
+    <div class="slotContainer">
+        <slot></slot>
+    </div>
 </div>
 
 
@@ -30,8 +35,30 @@
 
 
 <style>
-    div {
+    .container {
         display: flex;
+        flex-direction: column;
+        padding: 5px 5px 0px;
+    }
+
+    .controls {
+        display: flex;
+        flex-direction: row;
+        border: 1px solid;
+        border-radius: 1em;
+        height: 120px;
+        padding-top: 24px;
+    }
+
+    .slotContainer {
+        margin-top: -6px;
+        margin-left: 10px;
+        position: absolute;
+        background-color: #fff;
+        width: max-content;
+        height: max-content;
+        padding-right: 3px;
+        padding-left: 3px;
     }
 
     .disabled {

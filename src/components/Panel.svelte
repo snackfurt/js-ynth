@@ -78,8 +78,9 @@
     }
 
     .open-panel {
-        height: 110px;
         border: 1px solid #ff3e00;
+        height: fit-content;
+        padding: 10px;
     }
 
 
