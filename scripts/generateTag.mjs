@@ -42,7 +42,7 @@ console.log('✔ copy public folder');
 const versionsIndexFile = path.resolve(versionsPath, 'index.html');
 const versionsIndexContent = fs.readFileSync(versionsIndexFile).toString();
 const searchString = `<div id="end"></div>`;
-const replaceString = `<a href="./${version}">${version} (${new Date().toISOString().substring(0, 19)})</a>
+const replaceString = `<a href="./${version}/">${version} (${new Date().toISOString().substring(0, 19)})</a>
 <div id="end"></div>`;
 const newIndexContent = versionsIndexContent.replace(searchString, replaceString);
 fs.writeFileSync(versionsIndexFile, newIndexContent);

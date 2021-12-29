@@ -1,6 +1,6 @@
 <main>
 	<h1>JS SYNTH</h1>
-	<small>v. {version} · <a href="./versions/">ARCHIVE</a></small>
+	<small>v. {version} · <a href="/versions/">ARCHIVE</a></small>
 	{#if userClicked}
 		<SoundwaveUi></SoundwaveUi>
 	{:else}
