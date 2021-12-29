@@ -28,7 +28,6 @@
     // reactive stuff
     $: {
         const finalFrequency = useInverseFrequency ? 1/frequency : frequency;
-        console.log({finalFrequency, useInverseFrequency, frequency})
         updateHandler({frequency: finalFrequency});
     }
     $: {
