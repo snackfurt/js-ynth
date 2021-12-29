@@ -81,15 +81,18 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
             }
         }
 
-        // now analyze
+        // check data - no input at all may occur occasionally
+        // if we have input[0] but not input[1], there's something wrong
         if (!input[0]) {
             console.warn('no input')
         }
-        if (!input[1]) {
+        if (input[0] && !input[1]) {
             console.warn('no ySamples - output busy?');
             this.postMessage('error', 'process');
+            return false;
         }
 
+        // now analyze
         if (input[0] && input[1]) {
             const xSamplesRaw = input[0];
             const ySamplesRaw = input[1];
