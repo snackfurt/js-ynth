@@ -1,7 +1,7 @@
 <div class="container">
     <div class="controls" class:disabled>
-        <Knob bind:value={waveTypeStep} title="WAVE TYPE" outputValue={waveType} max={4} min={1} pixelRange={200}/>
-        <Knob bind:value={frequency} title="FREQUENCY" unit="Hz" max={maxFrequency} min={minFrequency} pixelRange={200}/>
+        <Knob bind:value={waveTypeStep} title="WAVE TYPE" outputValue={waveType} max={4} min={1}/>
+        <Knob bind:value={frequency} bind:useInverse={useInverseFrequency} title="FREQUENCY" unit="Hz" max={maxFrequency} min={minFrequency} enableInverse={enableInverseFrequency}/>
     </div>
     <div class="slotContainer">
         <slot></slot>
@@ -15,16 +15,22 @@
     export let updateHandler;
     export let waveType;
     export let frequency;
+    export let useInverseFrequency;
     export let maxFrequency;
     export let minFrequency;
     export let disabled = false;
+    export let enableInverseFrequency = false;
 
     let waveTypeStep = 1;
 
     const WAVE_TYPES = ['sine', 'triangle', 'sawtooth', 'square'];
 
     // reactive stuff
-    $: updateHandler({frequency});
+    $: {
+        const finalFrequency = useInverseFrequency ? 1/frequency : frequency;
+        console.log({finalFrequency, useInverseFrequency, frequency})
+        updateHandler({frequency: finalFrequency});
+    }
     $: {
         waveType = WAVE_TYPES[waveTypeStep-1];
         updateHandler({waveType});

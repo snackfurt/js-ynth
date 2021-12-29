@@ -3,7 +3,7 @@
         SOUND
     </Oscillator>
 
-    <Oscillator disabled={!lfoActive} maxFrequency={200} minFrequency={1} frequency={10} updateHandler={updateLfo}>
+    <Oscillator disabled={!lfoActive} maxFrequency={200} minFrequency={1} frequency={10} updateHandler={updateLfo} enableInverseFrequency={true}>
         <Toggle bind:toggled={lfoActive}
                 hideLabel label="toggle LFO"
                 switchColor="#ff3e00"
@@ -86,5 +86,5 @@
 
 
 <style>
-    
+
 </style>

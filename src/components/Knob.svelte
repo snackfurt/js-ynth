@@ -1,7 +1,10 @@
 <div class="knobContainer">
     <div class="label">{title}</div>
+    {#if enableInverse}
+        <button class="inverseButton" class:useInverse on:click={() => {useInverse = !useInverse}}><span class="icon">⅟</span></button>
+    {/if}
     <div class="knob center" style="--rotation: {rotation}" on:pointerdown={knobClicked}></div>
-    <div class="label">{outputValue ?? value} {unit}</div>
+    <div class="label">{displayedValue} {unit}</div>
     <div class="stepButtonContainer">
         <button class="stepButton" on:pointerdown={stepUpClicked}><span class="icon">&plus;</span></button>
         <button class="stepButton" on:pointerdown={stepDownClicked}><span class="icon">&minus;</span></button>
@@ -16,10 +19,19 @@
     export let title = '';
     export let unit = '';
     export let outputValue = null;
+    export let enableInverse = false;
+    export let useInverse = false;
 
     let startY, startValue, stepButtonDown, stepButtonTimeout;
+    let displayedValue;
+
     $: valueRange = max - min;
     $: rotation = startRotation + (value - min) / valueRange * rotRange;
+    $: displayedValue = outputValue ?? (useInverse ? round(1/value) : value);
+
+    function round(num) {
+        return num.toFixed(3);
+    }
 
     function clamp(num, min, max) {
         return Math.round(Math.max(min, Math.min(num, max)));
@@ -120,6 +132,24 @@
         width: 20px;
         padding: 0;
         margin: 0;
+    }
+
+    .inverseButton {
+        color: #ff3e00;
+        font-size: 1rem;
+        border: 1px solid #ff3e00;
+        background: none;
+        height: 20px;
+        width: 20px;
+        padding: 0;
+        position: absolute;
+        margin-left: 87px;
+        margin-top: 28px;
+    }
+
+    .useInverse {
+        color: #ffffff;
+        background-color: #ff3e00;
     }
 </style>
 
