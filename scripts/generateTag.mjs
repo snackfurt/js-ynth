@@ -3,8 +3,10 @@ import * as path from 'path';
 import { tmpdir } from 'os';
 import { execSync } from 'child_process';
 
-const versionFile = path.resolve('./version.txt');
-const version = fs.readFileSync(versionFile).toString();
+const packageJsonFile = path.resolve('./package.json');
+const packageJsonFileContent = fs.readFileSync(packageJsonFile).toString();
+const packageConfig = JSON.parse(packageJsonFileContent);
+const version = packageConfig.version;
 
 // copy public folder except "versions" subdir
 const publicDirPath = path.resolve('./public');
