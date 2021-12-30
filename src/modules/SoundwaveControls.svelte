@@ -3,7 +3,7 @@
         SOUND
     </Oscillator>
 
-    <Oscillator disabled={!lfoActive} maxFrequency={200} minFrequency={1} frequency={10} updateHandler={updateLfo} enableInverseFrequency={true}>
+    <Oscillator disabled={!lfoActive} maxFrequency={200} minFrequency={1} frequency={10} updateHandler={updateLfo} enableInverseFrequency={true} enableDetune={false}>
         <Toggle bind:toggled={lfoActive}
                 hideLabel label="toggle LFO"
                 switchColor="#ff3e00"
@@ -58,7 +58,7 @@
     function updateSound(updateData) {
         //console.log({updateData});
 
-        const { frequency, waveType } = updateData;
+        const { frequency, waveType, detune } = updateData;
         if (frequency) {
             soundFrequency = frequency;
             sound.setFrequency(frequency);
@@ -66,6 +66,9 @@
         if (waveType) {
             soundWaveType = waveType;
             initSoundWave();
+        }
+        if (detune !== undefined) {
+            sound.setDetune(detune);
         }
     }
 

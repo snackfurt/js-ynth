@@ -13,7 +13,7 @@
     export let fps = 60;
     export let oldWavesDisplayed = 10;
 
-    let sampleSizeStep = 15;
+    let sampleSizeStep = 10;
 
     $: sampleSize = 1 / sampleSizeStep;
 </script>

@@ -2,6 +2,9 @@
     <div class="controls" class:disabled>
         <Knob bind:value={waveTypeStep} title="WAVE TYPE" outputValue={waveType} max={4} min={1}/>
         <Knob bind:value={frequency} bind:useInverse={useInverseFrequency} title="FREQUENCY" unit="Hz" max={maxFrequency} min={minFrequency} enableInverse={enableInverseFrequency}/>
+        {#if enableDetune}
+            <Knob bind:value={detune} title="DETUNE" unit="cents" max={50} min={-50}/>
+        {/if}
     </div>
     <div class="slotContainer">
         <slot></slot>
@@ -15,11 +18,13 @@
     export let updateHandler;
     export let waveType;
     export let frequency;
-    export let useInverseFrequency;
     export let maxFrequency;
     export let minFrequency;
     export let disabled = false;
     export let enableInverseFrequency = false;
+    export let useInverseFrequency = false;
+    export let enableDetune = true;
+    export let detune = 0;
 
     let waveTypeStep = 1;
 
@@ -33,6 +38,9 @@
     $: {
         waveType = WAVE_TYPES[waveTypeStep-1];
         updateHandler({waveType});
+    }
+    $: {
+        updateHandler({detune});
     }
     //
 

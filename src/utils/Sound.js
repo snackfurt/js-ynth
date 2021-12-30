@@ -4,7 +4,7 @@
  * The underlying sound is created by the soundsystem ('createSound').
  */
 
-import {createSound, removeOscillator} from './soundsystem';
+import {createSound, removeOscillator, getAudioContext} from './soundsystem';
 import LFO from './LFO';
 
 export default class Sound {
@@ -22,6 +22,12 @@ export default class Sound {
     setFrequency(frequency) {
         if (this.soundwave) {
             this.soundwave.frequency = frequency;
+        }
+    }
+
+    setDetune(detune) {
+        if (this.soundwave) {
+            this.soundwave.sourceNode.detune.setValueAtTime(detune, getAudioContext().currentTime);
         }
     }
 

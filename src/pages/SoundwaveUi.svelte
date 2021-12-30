@@ -92,10 +92,12 @@
 
     function addSound() {
         const sound = new Sound();
-        if (isSoundPlaying) {
-            sound.play();
-        }
         sounds = sounds.concat(sound);
+
+        if (isSoundPlaying) {
+            sounds.forEach(sound => sound.stop());
+            sounds.forEach(sound => sound.play());
+        }
     }
 
     function removeSound(sound) {
