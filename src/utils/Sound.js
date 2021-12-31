@@ -4,19 +4,22 @@
  * The underlying sound is created by the soundsystem ('createSound').
  */
 
-import {createSound, removeOscillator, getAudioContext} from './soundsystem';
+import {createSound, removeOscillator} from './soundsystem';
 import LFO from './LFO';
 
 export default class Sound {
     constructor() {
         this.soundwave = null;
+        this.gain = null;
         this.lfo = null;
         this.isPlaying = false;
     }
 
     init(waveType, frequency) {
         this.remove();
-        this.soundwave = createSound(waveType, frequency);
+        const { sound, soundGain } = createSound(waveType, frequency);
+        this.soundwave = sound;
+        this.gain = soundGain;
     }
 
     setFrequency(frequency) {
@@ -27,7 +30,7 @@ export default class Sound {
 
     setDetune(detune) {
         if (this.soundwave) {
-            this.soundwave.sourceNode.detune.setValueAtTime(detune, getAudioContext().currentTime);
+            this.soundwave.sourceNode.detune.value = detune;
         }
     }
 
@@ -79,5 +82,8 @@ export default class Sound {
     remove() {
         this.removeLfo();
         removeOscillator(this.soundwave);
+        if (this.gain) {
+            this.gain.disconnect();
+        }
     }
 }

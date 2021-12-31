@@ -16,8 +16,15 @@ async function init(drawCallback, errorCallback) {
     processErrorCallback = errorCallback;
 
     audioContext = Pizzicato.context;
-    limiter = new Pizzicato.Effects.Compressor();
-    preGain = audioContext.createGain();
+
+    preGain = createGain();
+    limiter = new Pizzicato.Effects.Compressor({
+        threshold: -5.0, // decibels
+        knee: 0, // decibels
+        ratio: 40.0,  // decibels
+        attack: 0.001, // seconds
+        release: 0.1, // seconds
+    });
 
     processorOptions = {
         mainGain: Pizzicato.masterGainNode.gain.value,
@@ -58,9 +65,11 @@ function handleProcessorMessage(message) {
 
 function createSound(type, frequency) {
     const sound = createOscillator(type, frequency);
-    sound.masterVolume.connect(preGain);
+    const soundGain = audioContext.createGain();
+    sound.connect(soundGain);
+    soundGain.connect(preGain);
 
-    return sound;
+    return {sound, soundGain};
 }
 
 function createOscillator(type, frequency) {
@@ -117,8 +126,8 @@ function processorMessage(id, data) {
     }
 }
 
-function getAudioContext() {
-    return audioContext;
+function createGain(options = {}) {
+    return new GainNode(audioContext, options);
 }
 
 export {
@@ -130,5 +139,5 @@ export {
     stopSoundProcessor,
     setProcessorSweepTime,
     setProcessorFps,
-    getAudioContext,
+    createGain,
 }

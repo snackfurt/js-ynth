@@ -1,4 +1,4 @@
-import {createOscillator, getAudioContext, removeOscillator} from './soundsystem';
+import {createOscillator, removeOscillator, createGain} from './soundsystem';
 
 export default class LFO {
 
@@ -20,8 +20,7 @@ export default class LFO {
 
         this.oscillator = createOscillator(waveType, frequency);
 
-        this.gain = getAudioContext().createGain();
-        this.gain.gain.value = 100;
+        this.gain = createGain({ gain: 100 });
         this.gain.connect(destination);
 
         this.oscillator.connect(this.gain);
