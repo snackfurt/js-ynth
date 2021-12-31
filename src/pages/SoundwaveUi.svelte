@@ -4,16 +4,18 @@
 {:else}
     <Oscilloscope bind:this={oscilloscope} {oldWavesDisplayed} />
 {/if}
-<button on:click={toggleSound}>
-    {#if isSoundPlaying}
-        stop sound
-    {:else}
-        play sound
-    {/if}
-</button>
-<button on:click={addSound}>
-    add a sound
-</button>
+<div>
+    <button on:click={toggleSound}>
+        {#if isSoundPlaying}
+            stop sound
+        {:else}
+            play sound
+        {/if}
+    </button>
+    <button on:click={addSound}>
+        add a sound
+    </button>
+</div>
 {#each sounds as sound}
     <SoundwaveControls bind:sound={sound} removeHandler={() => removeSound(sound)} />
 {/each}
@@ -131,5 +133,17 @@
 <style>
     .errorMsg {
         margin: 20px 0;
+    }
+
+    button {
+        background-color: white;
+        color: #ff3e00;
+        text-align: left;
+        border: 1px solid;
+        text-transform: uppercase;
+    }
+
+    div {
+        
     }
 </style>

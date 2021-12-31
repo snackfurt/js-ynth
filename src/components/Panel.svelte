@@ -5,15 +5,11 @@
         {/if}
         <button class="panel-button" on:click={() => isOpen = !isOpen}>
             <span class="heading">{heading}</span>
-            {#if isOpen}
-                <span class="icon">&mapstoup;</span>
-            {:else}
-                <span class="icon">&mapstodown;</span>
-            {/if}
+            <span class="icon">{#if isOpen}&mapstoup;{:else}&mapstodown;{/if}</span>
         </button>
     </div>
 
-    <section class:open-panel={isOpen} class="panel-content">
+    <section class:isOpen class="panel-content">
         <slot></slot>
     </section>
 </div>
@@ -52,6 +48,7 @@
         margin-top: -1px;
         margin-bottom: 5px;
         border: none;
+        visibility: hidden;
     }
 
     .panel-button {
@@ -77,10 +74,11 @@
         padding-left: 2px;
     }
 
-    .open-panel {
+    .isOpen {
         border: 1px solid #ff3e00;
         height: fit-content;
         padding: 10px;
+        visibility: visible;
     }
 
 
