@@ -1,4 +1,4 @@
-<Oscillator maxFrequency={5000} minFrequency={60} frequency={80} {updateHandler}>
+<Oscillator bind:frequency={frequency} bind:waveType={waveType} maxFrequency={5000} minFrequency={60}>
     <Knob slot="knob3" bind:value={detune} title="DETUNE" unit="cents" max={50} min={-50} />
     <span slot="label">SOUND</span>
 </Oscillator>
@@ -8,12 +8,9 @@
     import Oscillator from './OscillatorControls.svelte';
     import Knob from '../../components/Knob.svelte';
 
-    export let updateHandler;
-    
-    let detune = 0;
-
-    $: {
-        updateHandler({detune});
-    }
+    // getters
+    export let waveType;
+    export let frequency;
+    export let detune;
     
 </script>

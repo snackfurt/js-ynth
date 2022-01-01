@@ -1,4 +1,4 @@
-<Oscillator disabled={!lfoActive} maxFrequency={200} minFrequency={1} frequency={10} enableInverseFrequency={true} {updateHandler}>
+<Oscillator bind:frequency={frequency} bind:waveType={waveType} disabled={!lfoActive} maxFrequency={200} minFrequency={1} enableInverseFrequency={true}>
     <Knob slot="knob3" bind:value={depth} title="DEPTH" unit="" max={100} min={1}/>
     <Toggle slot="label" bind:toggled={lfoActive}
             hideLabel label="toggle LFO"
@@ -15,16 +15,10 @@
     import Knob from '../../components/Knob.svelte';
     import Toggle from '../../components/Toggle.svelte';
 
-    export let updateHandler;
-
-    let lfoActive = false;
-    let depth = 50;
-
-    $: {
-        updateHandler({depth});
-    }
-    $: {
-        updateHandler({lfoIsActive: lfoActive});
-    }
+    // getters
+    export let lfoActive;
+    export let waveType;
+    export let frequency;
+    export let depth;
 
 </script>

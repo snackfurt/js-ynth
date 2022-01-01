@@ -1,7 +1,7 @@
 <div class="container">
     <div class="controls" class:disabled>
-        <Knob bind:value={waveTypeStep} title="WAVE TYPE" outputValue={waveType} max={4} min={1}/>
-        <Knob bind:value={frequency} bind:useInverse={useInverseFrequency} title="FREQUENCY" unit="Hz" max={maxFrequency} min={minFrequency} enableInverse={enableInverseFrequency}/>
+        <Knob bind:value={waveTypeValue} title="WAVE TYPE" outputValue={waveType} max={4} min={1}/>
+        <Knob bind:value={frequencyValue} bind:useInverse={useInverseFrequency} title="FREQUENCY" unit="Hz" max={maxFrequency} min={minFrequency} enableInverse={enableInverseFrequency}/>
         <slot name="knob3"></slot>
     </div>
     <div class="labelContainer">
@@ -13,27 +13,27 @@
 <script>
     import Knob from '../../components/Knob.svelte';
 
-    export let updateHandler;
+    // getters
     export let waveType;
     export let frequency;
+    export let useInverseFrequency = false;
+    // setters
     export let maxFrequency;
     export let minFrequency;
     export let disabled = false;
     export let enableInverseFrequency = false;
-    export let useInverseFrequency = false;
 
-    let waveTypeStep = 1;
+    let waveTypeValue = 1;
+    let frequencyValue = frequency;
 
     const WAVE_TYPES = ['sine', 'triangle', 'sawtooth', 'square'];
 
     // reactive stuff
     $: {
-        const finalFrequency = useInverseFrequency ? 1/frequency : frequency;
-        updateHandler({frequency: finalFrequency});
+        frequency = useInverseFrequency ? 1/frequencyValue : frequencyValue;
     }
     $: {
-        waveType = WAVE_TYPES[waveTypeStep-1];
-        updateHandler({waveType});
+        waveType = WAVE_TYPES[waveTypeValue-1];
     }
     //
 

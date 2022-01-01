@@ -1,6 +1,6 @@
 <Panel heading="SOUNDWAVE" isOpen={true} removeHandler={() => removeHandler(sound)}>
-    <SoundGeneratorControls updateHandler={updateSound} />
-    <LFOControls updateHandler={updateLfo} />
+    <SoundGeneratorControls bind:frequency={soundFrequency} bind:waveType={soundWaveType} bind:detune={soundDetune} />
+    <LFOControls bind:lfoActive={lfoActive} bind:frequency={lfoFrequency} bind:waveType={lfoWaveType} bind:depth={lfoDepth} />
 </Panel>
 
 
@@ -13,16 +13,28 @@
     export let removeHandler;
 
     // sound
-    let soundFrequency;
     let soundWaveType;
+    let soundFrequency = 80;
+    let soundDetune = 0;
 
     // lfo
-    let lfoActive;
-    let lfoFrequency;
     let lfoWaveType;
-    let lfoDepth;
+    let lfoFrequency = 10;
+    let lfoDepth = 50;
+    let lfoActive = false;
 
     // reactive stuff
+    $: {
+        sound.setFrequency(soundFrequency);
+    }
+    $: {
+        soundWaveType && initSoundWave();
+    }
+    $: {
+        if (soundDetune !== undefined) {
+            sound.setDetune(soundDetune);
+        }
+    }
     $: {
         if (lfoActive) {
             sound.initLfo(lfoWaveType, lfoFrequency, lfoDepth);
@@ -42,42 +54,5 @@
             sound.play();
         }
     }
-
-    function updateSound(updateData) {
-        //console.log({updateData});
-
-        const { frequency, waveType, detune } = updateData;
-        if (frequency) {
-            soundFrequency = frequency;
-            sound.setFrequency(frequency);
-        }
-        if (waveType) {
-            soundWaveType = waveType;
-            initSoundWave();
-        }
-        if (detune !== undefined) {
-            sound.setDetune(detune);
-        }
-    }
-
-    function updateLfo(updateData) {
-        const { frequency, waveType, depth, lfoIsActive } = updateData;
-        if (frequency) {
-            lfoFrequency = frequency;
-            sound.setLfoFrequency(frequency);
-        }
-        if (waveType) {
-            lfoWaveType = waveType;
-            sound.initLfo(lfoWaveType, lfoFrequency, lfoDepth);
-        }
-        if (depth) {
-            lfoDepth = depth;
-            sound.initLfo(lfoWaveType, lfoFrequency, lfoDepth);
-        }
-        if (lfoIsActive !== undefined) {
-            lfoActive = lfoIsActive;
-        }
-    }
-
 
 </script>
