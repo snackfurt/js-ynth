@@ -1,6 +1,6 @@
 {
   "name": "js-ynth",
-  "version": "1.4",
+  "version": "1.5",
   "private": true,
   "scripts": {
     "build": "rollup -c",
