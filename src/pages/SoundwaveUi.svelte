@@ -22,7 +22,7 @@
 
 <script>
     import {onMount} from 'svelte';
-    import SoundwaveControls from '../modules/SoundwaveControls.svelte';
+    import SoundwaveControls from '../modules/soundwave/SoundwaveControls.svelte';
     import ViewControls from '../modules/ViewControls.svelte';
     import Sound from '../utils/Sound';
     import Oscilloscope, { drawCallback } from '../modules/Oscilloscope.svelte';
@@ -141,9 +141,5 @@
         text-align: left;
         border: 1px solid;
         text-transform: uppercase;
-    }
-
-    div {
-        
     }
 </style>

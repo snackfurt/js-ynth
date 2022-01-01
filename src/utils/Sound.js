@@ -34,11 +34,11 @@ export default class Sound {
         }
     }
 
-    initLfo(waveType, frequency) {
+    initLfo(waveType, frequency, depth) {
         this.removeLfo();
 
         this.lfo = new LFO();
-        this.lfo.init(waveType, frequency, this.soundwave.sourceNode.frequency);
+        this.lfo.init(waveType, frequency, depth, this.soundwave.sourceNode.frequency);
 
         if (this.isPlaying) {
             this.lfo.play();
@@ -64,8 +64,9 @@ export default class Sound {
             this.soundwave.play();
         }
         if (this.lfo) {
-            const { waveType, frequency } = this.lfo;
-            this.initLfo(waveType, frequency);
+            // lfo must be recreated (connected again) if sound was stopped
+            const { waveType, frequency, depth } = this.lfo;
+            this.initLfo(waveType, frequency, depth);
         }
     }
 

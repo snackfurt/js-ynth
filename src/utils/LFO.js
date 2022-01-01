@@ -9,18 +9,20 @@ export default class LFO {
         this.waveType = null;
         this.frequency = null;
         this.destination = null;
+        this.depth = null;
     }
 
-    init(waveType, frequency, destination) {
+    init(waveType, frequency, depth, destination) {
         this.waveType = waveType;
         this.frequency = frequency;
+        this.depth = depth;
         this.destination = destination;
 
         this.remove();
 
         this.oscillator = createOscillator(waveType, frequency);
 
-        this.gain = createGain({ gain: 100 });
+        this.gain = createGain({ gain: depth });
         this.gain.connect(destination);
 
         this.oscillator.connect(this.gain);
