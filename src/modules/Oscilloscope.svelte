@@ -25,6 +25,9 @@
 
     onDestroy(() => {
         clearFadeOut();
+        // reset async callbacks to avoid null pointers if they are called after removal
+        renderFunction = ()=>{};
+        drawImages = ()=>{};
     });
 
     function init() {
