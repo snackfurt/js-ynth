@@ -5,11 +5,15 @@ const sounds = [];
 let audioContext;
 let limiter;
 let preGain;
-let processor;
 
+let isSoundPlaying;
+let isInputPlaying;
+let inputStream;
+
+let processor;
+let processorOptions;
 let waveDataCallback;
 let processErrorCallback;
-let processorOptions;
 
 async function init(drawCallback, errorCallback) {
     waveDataCallback = drawCallback;
@@ -93,22 +97,63 @@ function removeOscillator(osc) {
     }
 }
 
-async function startSoundProcessor() {
-    console.log('startSoundProcessor')
+async function startUserAudio(echoCancellation) {
+    stopUserAudio();
+    navigator.mediaDevices.getUserMedia({ audio: {echoCancellation, noiseSuppression: true} })
+        .then(stream => {
+            const audioSourceNode = new MediaStreamAudioSourceNode(audioContext, {mediaStream: stream});
+            audioSourceNode.connect(limiter);
+            startSoundProcessor();
+            isInputPlaying = true;
+            inputStream = stream;
+            return true;
+        })
+        .catch(error => {
+            console.error(error);
+            return error;
+        });
+}
 
-    processor = createProcessor();
+function stopUserAudio() {
+    isInputPlaying = false;
+    stopSoundProcessor();
+    if (inputStream) {
+        inputStream.getAudioTracks().forEach(track => {
+            track.stop();
+        });
+        inputStream = null;
+    }
+}
 
+function startSound() {
     preGain.connect(limiter);
-    limiter.connect(processor);
-    processor.connect(Pizzicato.masterGainNode);
+    startSoundProcessor();
+    isSoundPlaying = true;
+}
+
+function stopSound() {
+    isSoundPlaying = false;
+    stopSoundProcessor();
+}
+
+function startSoundProcessor() {
+    if (!processor) {
+        console.log('startSoundProcessor')
+
+        processor = createProcessor();
+
+        limiter.connect(processor);
+        processor.connect(Pizzicato.masterGainNode);
+    }
 }
 
 function stopSoundProcessor() {
-    console.log('stopSoundProcessor')
-    if (processor) {
+    if (processor && !isInputPlaying && !isSoundPlaying) {
+        console.log('stopSoundProcessor');
         processorMessage('stop');
         limiter.disconnect(processor);
         processor.disconnect(Pizzicato.masterGainNode);
+        processor = null;
     }
 }
 
@@ -135,9 +180,11 @@ export {
     createOscillator,
     createSound,
     removeOscillator,
-    startSoundProcessor,
-    stopSoundProcessor,
     setProcessorSweepTime,
     setProcessorFps,
     createGain,
+    startUserAudio,
+    stopUserAudio,
+    startSound,
+    stopSound,
 }

@@ -2,9 +2,20 @@
 {#if errorMessage}
     <div class="errorMsg">{errorMessage}</div>
 {:else}
-    <Oscilloscope bind:this={oscilloscope} {oldWavesDisplayed} />
+    <Oscilloscope {oldWavesDisplayed} />
 {/if}
 <div>
+    <label>
+        <input type="checkbox" bind:checked={useEchoCancellation} on:change={startAudioInput} disabled={!isInputPlaying}>
+        echo cancellation
+    </label>
+    <button on:click={toggleAudioInput}>
+        {#if isInputPlaying}
+            stop input
+        {:else}
+            get input
+        {/if}
+    </button>
     <button on:click={toggleSound}>
         {#if isSoundPlaying}
             stop sound
@@ -27,17 +38,21 @@
     import Sound from '../utils/Sound';
     import Oscilloscope, { drawCallback } from '../modules/Oscilloscope.svelte';
     import {
-        init as initSoundsystem, setProcessorFps,
+        init as initSoundsystem, 
+        startSound as startPlayingSound,
+        stopSound as stopPlayingSound,
+        startUserAudio,
+        stopUserAudio,
+        setProcessorFps,
         setProcessorSweepTime,
-        startSoundProcessor,
-        stopSoundProcessor
     } from '../utils/soundsystem';
 
     let isSoundPlaying = false;
+    let isInputPlaying = false;
+    let useEchoCancellation = true;
     let sampleSize;
     let fps;
     let oldWavesDisplayed;
-    let oscilloscope;
     let errorMessage;
 
     let sounds = [];
@@ -66,17 +81,41 @@
     }
     //
 
+    function toggleAudioInput() {
+        errorMessage = null;
+
+        if (isInputPlaying) {
+            stopUserAudio();
+            isInputPlaying = false;
+        }
+        else {
+            startAudioInput();
+        }
+    }
+
+    function startAudioInput() {
+        startUserAudio(useEchoCancellation)
+                .then(() => {
+                    console.log('got user audio');
+                    isInputPlaying = true;
+                })
+                .catch(error => {
+                    console.error('cannot get user audio', {error});
+                    errorMessage = 'cannot get audio input';
+                    isInputPlaying = false;
+                });
+    }
+
     function toggleSound() {
         errorMessage = null;
         isSoundPlaying = !isSoundPlaying;
     }
 
     function startSound() {
-        startSoundProcessor().then(() => {
-            setProcessorSweepTime(sampleSize);
-            setProcessorFps(fps);
-            sounds.forEach(sound => sound.play());
-        });
+        startPlayingSound();
+        setProcessorSweepTime(sampleSize);
+        setProcessorFps(fps);
+        sounds.forEach(sound => sound.play());
     }
 
     function stopSound() {
@@ -87,7 +126,7 @@
         const timeout = 600;
         setTimeout(() => {
             if (!isSoundPlaying) {
-                stopSoundProcessor();
+                stopPlayingSound();
             }
         }, timeout);
     }
