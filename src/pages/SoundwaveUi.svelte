@@ -5,10 +5,6 @@
     <Oscilloscope {oldWavesDisplayed} />
 {/if}
 <div>
-    <label>
-        <input type="checkbox" bind:checked={useEchoCancellation} on:change={startAudioInput} disabled={!isInputPlaying}>
-        echo cancellation
-    </label>
     <button on:click={toggleAudioInput}>
         {#if isInputPlaying}
             stop input
@@ -27,12 +23,16 @@
         add a sound
     </button>
 </div>
+{#if isInputPlaying}
+    <AudioInput bind:useEchoCancellation={useEchoCancellation} bind:useNoiseSuppression={useNoiseSuppression} removeHandler={stopAudioInput} />
+{/if}
 {#each sounds as sound}
     <SoundwaveControls bind:sound={sound} removeHandler={() => removeSound(sound)} />
 {/each}
 
 <script>
     import {onMount} from 'svelte';
+    import AudioInput from '../modules/AudioInput.svelte';
     import SoundwaveControls from '../modules/soundwave/SoundwaveControls.svelte';
     import ViewControls from '../modules/ViewControls.svelte';
     import Sound from '../utils/Sound';
@@ -49,7 +49,8 @@
 
     let isSoundPlaying = false;
     let isInputPlaying = false;
-    let useEchoCancellation = true;
+    let useEchoCancellation = false;
+    let useNoiseSuppression = true;
     let sampleSize;
     let fps;
     let oldWavesDisplayed;
@@ -63,30 +64,17 @@
     });
 
     // reactive stuff
-    $: {
-        if (isSoundPlaying) {
-            startSound();
-        }
-        else {
-            stopSound();
-        }
-    }
-
-    $: {
-        setProcessorSweepTime(sampleSize);
-    }
-
-    $: {
-        setProcessorFps(fps);
-    }
+    $: isSoundPlaying ? startSound() : stopSound();
+    $: setProcessorSweepTime(sampleSize);
+    $: setProcessorFps(fps);
+    $: updateAudioInput(useEchoCancellation, useNoiseSuppression);  // pass unused params to enable reactivity
     //
 
     function toggleAudioInput() {
         errorMessage = null;
 
         if (isInputPlaying) {
-            stopUserAudio();
-            isInputPlaying = false;
+            stopAudioInput();
         }
         else {
             startAudioInput();
@@ -94,7 +82,8 @@
     }
 
     function startAudioInput() {
-        startUserAudio(useEchoCancellation)
+        console.log('startAudioInput');
+        startUserAudio(useEchoCancellation, useNoiseSuppression)
                 .then(() => {
                     console.log('got user audio');
                     isInputPlaying = true;
@@ -104,6 +93,18 @@
                     errorMessage = 'cannot get audio input';
                     isInputPlaying = false;
                 });
+    }
+
+    function stopAudioInput() {
+        stopUserAudio();
+        isInputPlaying = false;
+    }
+
+    function updateAudioInput() {
+        console.log('updateAudioInput');
+        if (isInputPlaying) {
+            startAudioInput();
+        }
     }
 
     function toggleSound() {

@@ -97,9 +97,10 @@ function removeOscillator(osc) {
     }
 }
 
-async function startUserAudio(echoCancellation) {
+async function startUserAudio(echoCancellation, noiseSuppression) {
+    console.log('startUserAudio', {echoCancellation, noiseSuppression})
     stopUserAudio();
-    navigator.mediaDevices.getUserMedia({ audio: {echoCancellation, noiseSuppression: true} })
+    navigator.mediaDevices.getUserMedia({ audio: {echoCancellation, noiseSuppression} })
         .then(stream => {
             const audioSourceNode = new MediaStreamAudioSourceNode(audioContext, {mediaStream: stream});
             audioSourceNode.connect(limiter);
