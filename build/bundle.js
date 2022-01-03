@@ -4011,7 +4011,7 @@ var app = (function () {
     console.trace('soundsystem created');
 
     async function init(drawCallback, errorCallback) {
-        HTMLFormControlsCollection.trace('soundsystem init');
+        console.trace('soundsystem init');
         waveDataCallback = drawCallback;
         processErrorCallback = errorCallback;
 
@@ -4093,9 +4093,16 @@ var app = (function () {
         }
     }
 
+    function assertAudioContextRunning() {
+        if (Pizzicato_min.context.state !== 'running') {
+            Pizzicato_min.context.resume();
+        }
+    }
+
     async function startUserAudio(echoCancellation, noiseSuppression) {
         console.log('startUserAudio', {echoCancellation, noiseSuppression});
         stopUserAudio();
+        assertAudioContextRunning();
         navigator.mediaDevices.getUserMedia({ audio: {echoCancellation, noiseSuppression} })
             .then(stream => {
                 const audioSourceNode = new MediaStreamAudioSourceNode(audioContext, {mediaStream: stream});
@@ -4123,6 +4130,7 @@ var app = (function () {
     }
 
     function startSound() {
+        assertAudioContextRunning();
         preGain.connect(limiter);
         startSoundProcessor();
         isSoundPlaying = true;
