@@ -13,12 +13,12 @@
     export let removeHandler;
 
     // sound
-    let soundWaveType;
+    let soundWaveType = null;
     let soundFrequency = 80;
     let soundDetune = 0;
 
     // lfo
-    let lfoWaveType;
+    let lfoWaveType = null;
     let lfoFrequency = 10;
     let lfoDepth = 50;
     let lfoActive = false;

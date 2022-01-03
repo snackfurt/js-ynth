@@ -65,8 +65,5 @@
 		margin-bottom: 12px;
 	}
 
-	a {
-
-	}
 
 </style>

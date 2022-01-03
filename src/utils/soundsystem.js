@@ -15,6 +15,7 @@ let processorOptions;
 let waveDataCallback;
 let processErrorCallback;
 
+
 async function init(drawCallback, errorCallback) {
     waveDataCallback = drawCallback;
     processErrorCallback = errorCallback;
@@ -97,9 +98,15 @@ function removeOscillator(osc) {
     }
 }
 
+function assertAudioContextRunning() {
+    if (Pizzicato.context.state !== 'running') {
+        Pizzicato.context.resume();
+    }
+}
+
 async function startUserAudio(echoCancellation, noiseSuppression) {
-    console.log('startUserAudio', {echoCancellation, noiseSuppression})
     stopUserAudio();
+    assertAudioContextRunning();
     navigator.mediaDevices.getUserMedia({ audio: {echoCancellation, noiseSuppression} })
         .then(stream => {
             const audioSourceNode = new MediaStreamAudioSourceNode(audioContext, {mediaStream: stream});
@@ -127,6 +134,7 @@ function stopUserAudio() {
 }
 
 function startSound() {
+    assertAudioContextRunning();
     preGain.connect(limiter);
     startSoundProcessor();
     isSoundPlaying = true;

@@ -82,10 +82,8 @@
     }
 
     function startAudioInput() {
-        console.log('startAudioInput');
         startUserAudio(useEchoCancellation, useNoiseSuppression)
                 .then(() => {
-                    console.log('got user audio');
                     isInputPlaying = true;
                 })
                 .catch(error => {
@@ -101,7 +99,6 @@
     }
 
     function updateAudioInput() {
-        console.log('updateAudioInput');
         if (isInputPlaying) {
             startAudioInput();
         }

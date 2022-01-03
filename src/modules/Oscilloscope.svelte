@@ -132,7 +132,6 @@
     }
 
     function fadeOutImage() {
-        console.log('fadeOutImage', fadeOutTimeout);
         if (!fadeOutTimeout && canvasImages.length) {
             fadeOutTimeout = setTimeout(() => {
                 canvasImages.splice(0, 1);
@@ -159,7 +158,4 @@
         width: 80%;
     }
 
-    .canvas {
-
-    }
 </style>
