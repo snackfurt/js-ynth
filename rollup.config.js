@@ -83,7 +83,8 @@ export default {
 		}),
 		commonjs(),
 
-		copyAndWatch('src/utils/SoundwaveProcessor.js', 'utils/SoundwaveProcessor.js'),
+		copyAndWatch('src/processors/SoundwaveProcessor.js', 'processors/SoundwaveProcessor.js'),
+		copyAndWatch('src/processors/SingleSoundProcessor.js', 'processors/SingleSoundProcessor.js'),
 
 		// In dev mode, call `npm run start` once
 		// the bundle has been generated

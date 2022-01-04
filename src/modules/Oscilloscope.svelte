@@ -26,7 +26,8 @@
     onDestroy(() => {
         clearFadeOut();
         // reset async callbacks to avoid null pointers if they are called after removal
-        renderFunction = ()=>{};
+        renderWaveFunction = ()=>{};
+        renderSoundFunction = ()=>{};
         drawImages = ()=>{};
     });
 
@@ -38,7 +39,8 @@
         setCanvasSize(offscreenCanvas);
         offscreenDrawingContext = initDrawingContext(offscreenCanvas);
 
-        renderFunction = draw;
+        renderWaveFunction = drawWave;
+        renderSoundFunction = drawSound;
     }
 
     function setCanvasSize(canvas) {
@@ -61,8 +63,8 @@
         }
     }
 
-    function draw(data) {
-        //console.log('draw');
+    function drawWave(data) {
+        //console.log('drawWave');
 
         // stop fade out
         clearFadeOut();
@@ -91,6 +93,34 @@
         }
     }
 
+    function drawSound(data) {
+        //console.log('drawSound');
+
+        // draw samples
+        const { samplesX, samplesY } = data;
+        const { width, height } = offscreenCanvas;
+
+        const samplesLength = samplesX.length;
+        const xOffset = -1;
+
+        offscreenDrawingContext.clearRect(0, 0, width, height);
+        offscreenDrawingContext.beginPath();
+
+        for(let i = 0; i < samplesLength; i++) {
+            const mockData = {
+                xSamples: [xOffset + i / samplesLength * 2],   // range -1 to 1
+                ySamples: [samplesY[i]],
+            };
+            const { x, y } = getWavePointCoordsAtIndex(mockData, 0, width, height);
+            if (i === 0) offscreenDrawingContext.moveTo(x, y);
+            else offscreenDrawingContext.lineTo(x, y);
+        }
+
+        offscreenDrawingContext.stroke();
+
+        renderImage();
+    }
+
     function getWavePointCoordsAtIndex(waveData, index, canvasWidth, canvasHeight) {
         const { xSamples, ySamples } = waveData;
         const padding = 100;   // avoid clipping of top points
@@ -100,7 +130,7 @@
         const xOffset = canvasWidth / 2;
 
         return {
-            x: xOffset + xSamples[index] * canvasWidth,
+            x: xOffset + (xSamples[index] / 2) * canvasWidth,
             y: yOffset + (0.5 + ySamples[index] / 2) * height,
         }
     }
@@ -145,10 +175,15 @@
 </script>
 
 <script context="module">
-    let renderFunction;
+    let renderWaveFunction;
+    let renderSoundFunction;
 
-    export function drawCallback(data) {
-        renderFunction(data);
+    export function drawWaveCallback(data) {
+        renderWaveFunction(data);
+    }
+
+    export function drawSoundCallback(data) {
+        renderSoundFunction(data);
     }
 </script>
 

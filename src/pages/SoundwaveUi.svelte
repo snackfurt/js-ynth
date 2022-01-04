@@ -36,7 +36,7 @@
     import SoundwaveControls from '../modules/soundwave/SoundwaveControls.svelte';
     import ViewControls from '../modules/ViewControls.svelte';
     import Sound from '../utils/Sound';
-    import Oscilloscope, { drawCallback } from '../modules/Oscilloscope.svelte';
+    import Oscilloscope, { drawWaveCallback, drawSoundCallback } from '../modules/Oscilloscope.svelte';
     import {
         init as initSoundsystem, 
         startSound as startPlayingSound,
@@ -59,7 +59,7 @@
     let sounds = [];
 
     onMount(() => {
-        initSoundsystem(drawCallback, errorCallback);
+        initSoundsystem(drawWaveCallback, drawSoundCallback, errorCallback);
         sounds = sounds.concat(new Sound());
     });
 

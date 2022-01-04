@@ -13,11 +13,13 @@ let inputStream;
 let processor;
 let processorOptions;
 let waveDataCallback;
+let soundDataCallback;
 let processErrorCallback;
 
 
-async function init(drawCallback, errorCallback) {
-    waveDataCallback = drawCallback;
+async function init(drawWaveCallback, drawSoundCallback, errorCallback) {
+    waveDataCallback = drawWaveCallback;
+    soundDataCallback = drawSoundCallback;
     processErrorCallback = errorCallback;
 
     audioContext = Pizzicato.context;
@@ -35,11 +37,22 @@ async function init(drawCallback, errorCallback) {
         mainGain: Pizzicato.masterGainNode.gain.value,
         sampleRate: audioContext.sampleRate,
     }
-    await audioContext.audioWorklet.addModule('utils/SoundwaveProcessor.js');
+    await audioContext.audioWorklet.addModule('processors/SoundwaveProcessor.js');
+    await audioContext.audioWorklet.addModule('processors/SingleSoundProcessor.js');
 }
 
-function createProcessor() {
+function createSoundwaveProcessor() {
     const processorNode = new AudioWorkletNode(audioContext, 'soundwave-processor', {processorOptions});
+    processorNode.port.onmessage = (e) => {
+        //console.log('soundsystem.onmessage', e);
+        handleProcessorMessage(e.data);
+    }
+
+    return processorNode;
+}
+
+function createSingleSoundProcessor() {
+    const processorNode = new AudioWorkletNode(audioContext, 'single-sound-processor', {processorOptions});
     processorNode.port.onmessage = (e) => {
         //console.log('soundsystem.onmessage', e);
         handleProcessorMessage(e.data);
@@ -55,6 +68,12 @@ function handleProcessorMessage(message) {
     switch (id) {
         case 'waveData': {
             waveDataCallback(data);
+            break;
+        }
+        case 'soundData': {
+            console.log('got soundData', data);
+            stopSingleSoundProcessor();
+            soundDataCallback(data);
             break;
         }
         case 'error': {
@@ -111,7 +130,7 @@ async function startUserAudio(echoCancellation, noiseSuppression) {
         .then(stream => {
             const audioSourceNode = new MediaStreamAudioSourceNode(audioContext, {mediaStream: stream});
             audioSourceNode.connect(limiter);
-            startSoundProcessor();
+            startSoundwaveProcessor();
             isInputPlaying = true;
             inputStream = stream;
             return true;
@@ -124,7 +143,7 @@ async function startUserAudio(echoCancellation, noiseSuppression) {
 
 function stopUserAudio() {
     isInputPlaying = false;
-    stopSoundProcessor();
+    stopSoundwaveProcessor();
     if (inputStream) {
         inputStream.getAudioTracks().forEach(track => {
             track.stop();
@@ -136,29 +155,51 @@ function stopUserAudio() {
 function startSound() {
     assertAudioContextRunning();
     preGain.connect(limiter);
-    startSoundProcessor();
+    //startSoundwaveProcessor();
+    startSingleSoundProcessor();
     isSoundPlaying = true;
 }
 
 function stopSound() {
     isSoundPlaying = false;
-    stopSoundProcessor();
+    //stopSoundwaveProcessor();
 }
 
-function startSoundProcessor() {
+function startSingleSoundProcessor() {
     if (!processor) {
-        console.log('startSoundProcessor')
+        console.log('startSingleSoundProcessor')
 
-        processor = createProcessor();
+        processor = createSingleSoundProcessor();
 
         limiter.connect(processor);
         processor.connect(Pizzicato.masterGainNode);
     }
 }
 
-function stopSoundProcessor() {
+function stopSingleSoundProcessor() {
+    if (processor) {
+        console.log('stopSingleSoundProcessor');
+        //processorMessage('stop');
+        limiter.disconnect(processor);
+        processor.disconnect(Pizzicato.masterGainNode);
+        processor = null;
+    }
+}
+
+function startSoundwaveProcessor() {
+    if (!processor) {
+        console.log('startSoundwaveProcessor')
+
+        processor = createSoundwaveProcessor();
+
+        limiter.connect(processor);
+        processor.connect(Pizzicato.masterGainNode);
+    }
+}
+
+function stopSoundwaveProcessor() {
     if (processor && !isInputPlaying && !isSoundPlaying) {
-        console.log('stopSoundProcessor');
+        console.log('stopSoundwaveProcessor');
         processorMessage('stop');
         limiter.disconnect(processor);
         processor.disconnect(Pizzicato.masterGainNode);

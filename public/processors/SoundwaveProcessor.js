@@ -34,10 +34,6 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
         //console.log('AudioWorkletProcessor.onMessage:', event.data);
         const { id, data } = event.data;
         switch(id) {
-            case 'start': {
-                this.continueProcessing = true;
-                break;
-            }
             case 'stop': {
                 this.continueProcessing = false;
                 break;
@@ -106,16 +102,12 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
             const ySamples = new Float32Array(length);
 
             for (let i = 0; i < length; i++) {
-                xSamples[i] = xSamplesRaw[i];
-                ySamples[i] = ySamplesRaw[i];
-            }
-
-            for (let i = 0; i < length; i++) {
                 this.sweepPosition += this.samplesPerSweep;
                 if (this.sweepPosition > 1.0) {
                     this.sweepPosition = -1;
                 }
                 xSamples[i] = this.sweepPosition;
+                ySamples[i] = ySamplesRaw[i];
             }
 
             this.samplesX.push(...xSamples);
