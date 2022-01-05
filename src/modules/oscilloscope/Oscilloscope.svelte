@@ -1,3 +1,4 @@
+<ViewControls bind:sampleSize={sampleSize} bind:oldWavesDisplayed={oldWavesDisplayed} bind:fps={fps} />
 <div class="canvasContainer center" bind:this={canvasContainer}>
     <canvas class="canvas" bind:this={onscreenCanvas}></canvas>
 </div>
@@ -5,8 +6,11 @@
 
 <script>
     import {onMount, onDestroy} from 'svelte';
+    import ViewControls from './OscilloscopeControls.svelte';
 
     export let oldWavesDisplayed;
+    export let sampleSize;
+    export let fps;
 
     const canvasImages = [];
 

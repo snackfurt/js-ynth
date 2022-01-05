@@ -126,7 +126,7 @@ function assertAudioContextRunning() {
 async function startUserAudio(echoCancellation, noiseSuppression) {
     stopUserAudio();
     assertAudioContextRunning();
-    navigator.mediaDevices.getUserMedia({ audio: {echoCancellation, noiseSuppression} })
+    return navigator.mediaDevices.getUserMedia({ audio: {echoCancellation, noiseSuppression} })
         .then(stream => {
             const audioSourceNode = new MediaStreamAudioSourceNode(audioContext, {mediaStream: stream});
             audioSourceNode.connect(limiter);
@@ -134,10 +134,6 @@ async function startUserAudio(echoCancellation, noiseSuppression) {
             isInputPlaying = true;
             inputStream = stream;
             return true;
-        })
-        .catch(error => {
-            console.error(error);
-            return error;
         });
 }
 
@@ -155,14 +151,14 @@ function stopUserAudio() {
 function startSound() {
     assertAudioContextRunning();
     preGain.connect(limiter);
-    //startSoundwaveProcessor();
-    startSingleSoundProcessor();
+    startSoundwaveProcessor();
+    //startSingleSoundProcessor();
     isSoundPlaying = true;
 }
 
 function stopSound() {
     isSoundPlaying = false;
-    //stopSoundwaveProcessor();
+    stopSoundwaveProcessor();
 }
 
 function startSingleSoundProcessor() {

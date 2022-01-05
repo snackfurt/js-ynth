@@ -1,8 +1,6 @@
-<ViewControls bind:sampleSize={sampleSize} bind:oldWavesDisplayed={oldWavesDisplayed} bind:fps={fps} />
+<Oscilloscope bind:sampleSize={sampleSize} bind:oldWavesDisplayed={oldWavesDisplayed} bind:fps={fps} />
 {#if errorMessage}
     <div class="errorMsg">{errorMessage}</div>
-{:else}
-    <Oscilloscope {oldWavesDisplayed} />
 {/if}
 <div>
     <button on:click={toggleAudioInput}>
@@ -34,9 +32,8 @@
     import {onMount} from 'svelte';
     import AudioInput from '../modules/AudioInput.svelte';
     import SoundwaveControls from '../modules/soundwave/SoundwaveControls.svelte';
-    import ViewControls from '../modules/ViewControls.svelte';
     import Sound from '../utils/Sound';
-    import Oscilloscope, { drawWaveCallback, drawSoundCallback } from '../modules/Oscilloscope.svelte';
+    import Oscilloscope, { drawWaveCallback, drawSoundCallback } from '../modules/oscilloscope/Oscilloscope.svelte';
     import {
         init as initSoundsystem, 
         startSound as startPlayingSound,
@@ -51,10 +48,10 @@
     let isInputPlaying = false;
     let useEchoCancellation = false;
     let useNoiseSuppression = true;
-    let sampleSize;
-    let fps;
-    let oldWavesDisplayed;
-    let errorMessage;
+    let sampleSize = 0.1;
+    let fps = 60;
+    let oldWavesDisplayed = 10;
+    let errorMessage = null;
 
     let sounds = [];
 
