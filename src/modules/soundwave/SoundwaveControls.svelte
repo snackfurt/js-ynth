@@ -50,6 +50,10 @@
 
         sound.init(soundWaveType, soundFrequency);
 
+        if (lfoActive) {
+            sound.initLfo(lfoWaveType, lfoFrequency, lfoDepth);
+        }
+
         if (isPlaying) {
             sound.play();
         }
