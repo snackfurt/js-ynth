@@ -4,6 +4,8 @@
 
 A playground for soundwave manipulation. Probably sometime something like a Javascript synthesizer.
 
+See the current state here: https://snackfurt.github.io/js-ynth/
+
 Based on svelte-app.
 
 ## Get started
