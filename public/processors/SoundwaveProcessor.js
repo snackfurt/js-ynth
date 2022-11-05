@@ -11,7 +11,21 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
         this.sampleTime = 1 / this.options.sampleRate;              // 1 / 44100 = 0,00002267573696 s
         this.frameTime = 1 / 60 * 1000;                             // 16,66666667 ms
         this.sweepMinTime = 1 / 15;                                 // ms per drawing (?)
-        this.lastDraw = 0;
+        this.lastDrawTime = 0;
+
+        // vars for the process() function, create here to avoid garbage collection
+        this.processStartTime = 0;
+        this.processNowTime = 0;
+        this.processDuration = 0;
+        this.timeSinceLastDraw = 0;
+        this.input = [];
+        this.output = [];
+        this.inChannel = [];
+        this.outChannel = [];
+        this.channelCount = 0;
+        this.channelSample = 0;
+        this.xSamples = new Float32Array();
+        this.ySamples = new Float32Array();
 
         this.oneWave = 1 / 80;      // 0,0125
         this.samplesPerWave = this.oneWave / this.sampleTime; // 551,25
@@ -61,70 +75,59 @@ class SoundwaveProcessor extends AudioWorkletProcessor {
 
     process(inputs, outputs, parameters)
     {
-        //console.log('process')
-        const input = inputs[0];
-        const output = outputs[0];
+        this.processStartTime = Date.now();
+
+        this.input = inputs[0];
+        this.output = outputs[0];
 
         // copy over input to output to bypass the sound to the next audio node
-        for (let channel = 0; channel < output.length; ++channel) {
-            const inChannel = input[channel];
-            const outChannel = output[channel];
+        for (this.channelCount = 0; this.channelCount < this.output.length; ++this.channelCount) {
+            this.inChannel = this.input[this.channelCount];
+            this.outChannel = this.output[this.channelCount];
 
-            if (inChannel) {
-                for (let i = 0; i < inChannel.length; i++) {
-                    outChannel[i] = inChannel[i];
+            if (this.inChannel) {
+                for (this.channelSample = 0; this.channelSample < this.inChannel.length; this.channelSample++) {
+                    this.outChannel[this.channelSample] = this.inChannel[this.channelSample];
                 }
             }
         }
 
         // check data - no input at all may occur occasionally
-        // if we have input[0] but not input[1], there's something wrong
-        if (!input[0]) {
+        if (!this.input[0]) {
             console.warn('no input')
-        }
-        if (input[0] && !input[1]) {
-            console.warn('no ySamples - output busy?');
-            this.postMessage('error', 'process');
-            return false;
         }
 
         // now analyze
-        if (input[0] && input[1]) {
-            const xSamplesRaw = input[0];
-            const ySamplesRaw = input[1];
+        if (this.input[0]) {
+            this.ySamples = Float32Array.from(this.input[0]);
+            this.xSamples = new Float32Array(this.ySamples.length);
 
-            // this.postMessage({xSamples: xSamplesRaw, ySamples: ySamplesRaw, mainGain: this.options.mainGain});
-            // return true;
-
-            const length = xSamplesRaw.length;
-
-            const xSamples = new Float32Array(length);
-            const ySamples = new Float32Array(length);
-
-            for (let i = 0; i < length; i++) {
+            for (this.channelSample = 0; this.channelSample < this.ySamples.length; this.channelSample++) {
                 this.sweepPosition += this.samplesPerSweep;
                 if (this.sweepPosition > 1.0) {
                     this.sweepPosition = -1;
                 }
-                xSamples[i] = this.sweepPosition;
-                ySamples[i] = ySamplesRaw[i];
+                this.xSamples[this.channelSample] = this.sweepPosition;
             }
 
-            this.samplesX.push(...xSamples);
-            this.samplesY.push(...ySamples);
+            this.samplesX.push(...this.xSamples);
+            this.samplesY.push(...this.ySamples);
         }
 
         // draw in ca. 60 fps or if we stop processing
-        const now = new Date().getTime();
-        const timeElapsed = now - this.lastDraw;
+        this.processNowTime = (currentTime * 1000).toFixed(2);
+        this.timeSinceLastDraw = this.processNowTime - this.lastDrawTime;
 
-        if (timeElapsed >= this.frameTime || !this.continueProcessing) {
-            const waveData = this.getWaveData(this.samplesX.splice(0), this.samplesY.splice(0));
-            this.postMessage('waveData', waveData);
+        if (this.timeSinceLastDraw >= this.frameTime || !this.continueProcessing) {
+            this.postMessage('waveData', this.getWaveData(this.samplesX.splice(0), this.samplesY.splice(0)));
 
-            this.lastDraw = now;
-            // console.timeEnd('sample');
-            // console.time('sample')
+            this.lastDrawTime = this.processNowTime;
+        }
+
+        this.processDuration = Date.now() - this.processStartTime;
+        // console.log('processTime:', this.processDuration);
+        if (this.processDuration > 3) {
+            console.warn(`processing took ${this.processDuration} ms! did we just post? ${this.lastDrawTime === this.processNowTime}`);
         }
 
         return this.continueProcessing;
