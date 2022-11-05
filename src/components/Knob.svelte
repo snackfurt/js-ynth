@@ -3,11 +3,11 @@
     {#if enableInverse}
         <button class="inverseButton" class:useInverse on:click={() => {useInverse = !useInverse}}><span class="icon">⅟</span></button>
     {/if}
-    <div class="knob center" style="--rotation: {rotation}" on:pointerdown={knobClicked}></div>
+    <div class="knob center" style="--rotation: {rotation}" on:pointerdown|self={knobClicked}></div>
     <div class="label">{displayedValue} {unit}</div>
     <div class="stepButtonContainer">
-        <button class="stepButton" on:pointerdown={stepUpClicked}><span class="icon">&plus;</span></button>
-        <button class="stepButton" on:pointerdown={stepDownClicked}><span class="icon">&minus;</span></button>
+        <button class="stepButton" on:pointerdown|self={stepUpClicked}><span class="icon">&plus;</span></button>
+        <button class="stepButton" on:pointerdown|self={stepDownClicked}><span class="icon">&minus;</span></button>
     </div>
 </div>
 
@@ -24,10 +24,14 @@
 
     let startY, startValue, stepButtonDown, stepButtonTimeout;
     let displayedValue;
+    let stopScrolling = false;
 
     $: valueRange = max - min;
     $: rotation = startRotation + (value - min) / valueRange * rotRange;
     $: displayedValue = outputValue ?? (useInverse ? round(1/value) : value);
+
+    // avoid scrolling on mobile devices
+    window.addEventListener('touchmove', preventTouchMove, { passive: false });
 
     function round(num) {
         return num.toFixed(3);
@@ -42,16 +46,25 @@
         startValue = value;
         window.addEventListener('pointermove', knobMoved);
         window.addEventListener('pointerup', knobReleased);
+        stopScrolling = true;
     }
 
-    function knobMoved({ clientY }) {
+    function knobMoved(event) {
+        const { clientY } = event;
         const valueDiff = valueRange * (clientY - startY) / pixelRange;
-        value = clamp(startValue - valueDiff, min, max)
+        value = clamp(startValue - valueDiff, min, max);
     }
 
     function knobReleased() {
         window.removeEventListener('pointermove', knobMoved);
         window.removeEventListener('pointerup', knobReleased);
+        stopScrolling = false;
+    }
+
+    function preventTouchMove(event) {
+        if (stopScrolling) {
+            event.preventDefault();
+        }
     }
 
     function stepUpClicked() {
@@ -118,8 +131,8 @@
         display: flex;
         flex-direction: row;
         position: absolute;
-        width: 120px;
-        top: 75px;
+        width: 130px;
+        top: 67px;
         justify-content: space-between;
     }
 
@@ -127,20 +140,25 @@
         color: #ff3e00;
         font-size: 1rem;
         border: none;
-        background: none;
-        height: 20px;
-        width: 20px;
+        background: transparent;
+        height: 35px;
+        width: 35px;
         padding: 0;
         margin: 0;
     }
+
+    .icon {
+        pointer-events: none;
+    }
+
 
     .inverseButton {
         color: #ff3e00;
         font-size: 1rem;
         border: 1px solid #ff3e00;
-        background: none;
-        height: 20px;
-        width: 20px;
+        background: transparent;
+        height: 30px;
+        width: 30px;
         padding: 0;
         position: absolute;
         margin-left: 87px;

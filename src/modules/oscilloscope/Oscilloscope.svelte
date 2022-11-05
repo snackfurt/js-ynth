@@ -49,7 +49,7 @@
 
     function setCanvasSize(canvas) {
         canvas.width = canvasContainer.clientWidth;
-        canvas.height = canvas.width * 0.33;
+        canvas.height = canvasContainer.clientHeight;
     }
 
     function initDrawingContext(canvas) {
@@ -194,7 +194,8 @@
 
 <style>
     .canvasContainer {
-        width: 80%;
+        width: 600px;
+        height: 410px;
     }
 
 </style>

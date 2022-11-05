@@ -23,6 +23,10 @@
 
 
 <style>
+    .panel {
+        margin-bottom: 5px;
+    }
+
     .panel-header {
         margin: 0;
         border: 1px solid #ff3e00;
@@ -40,7 +44,7 @@
 
     .panel-content {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         justify-content: center;
         height: 0;
         overflow: auto;
@@ -67,7 +71,7 @@
         width: 26px;
         border: 1px solid #ff3e00;
         background: none;
-        font-size: 0.6em;
+        font-size: 0.6rem;
         margin-left: 5px;
         margin-top: 6px;
         margin-bottom: 0;
@@ -79,6 +83,15 @@
         height: fit-content;
         padding: 10px;
         visibility: visible;
+    }
+
+    @media screen and (min-width: 984px) {
+        
+        .panel-content {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+        }
     }
 
 
