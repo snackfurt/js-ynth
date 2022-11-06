@@ -44,12 +44,13 @@
     .container {
         display: flex;
         flex-direction: column;
-        padding: 5px 5px 0px;
+        padding: 5px 5px 12px;
     }
 
     .controls {
         display: flex;
         flex-direction: row;
+        justify-content: space-around;
         border: 1px solid;
         border-radius: 1em;
         height: 120px;
