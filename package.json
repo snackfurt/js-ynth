@@ -1,6 +1,6 @@
 {
   "name": "js-ynth",
-  "version": "1.6",
+  "version": "1.7",
   "private": true,
   "scripts": {
     "build": "rollup -c",
@@ -15,7 +15,7 @@
       "repository": "git@github.com:snackfurt/js-ynth.git",
       "branch": "deploy",
       "folder": "deploy",
-      "script": "cp -R ./public/ ./deploy",
+      "script": "cp -R ./public/* ./deploy/",
       "commit": "auto deploy",
       "user": {
         "email": "deingesichtundmeinarsch@web.de",
