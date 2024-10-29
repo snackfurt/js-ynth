@@ -1,6 +1,6 @@
 <main>
-	<h1>JS SYNTH</h1>
-	<small>v. {version} · <a href="{linkUrl}" bind:this={archiveLink}>ARCHIVE</a></small>
+	<h1>JS-YNTH</h1>
+	<small>v. {version} · <a href="{linkUrl}" bind:this={archiveLink}>ARCHIVE</a> · <a href="gallery.html" bind:this={galleryLink}>GALLERY</a></small>
 	{#if userClicked}
 		<SoundwaveUi></SoundwaveUi>
 	{:else}
@@ -18,13 +18,14 @@
 
 	let userClicked = false;
 	let archiveLink;
+	let galleryLink;
 
 	const linkUrl = location.pathname.includes('/versions/') ? '../' : './versions/';
 
 	window.addEventListener('pointerup', initApp);
 
 	function initApp(event) {
-		if (event.target !== archiveLink) {
+		if (event.target !== archiveLink && event.target !== galleryLink) {
 			window.removeEventListener('pointerup', initApp);
 			userClicked = true;
 		}
